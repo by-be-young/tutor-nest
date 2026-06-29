@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文章详情</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+</head>
+
+<body>
+    <div class="detail-container">
+        <header class="detail-header">
+            <a href="javascript:history.back()" class="back-link"><i class="fas fa-arrow-left"></i> 返回</a>
+            <span style="color: var(--gray); font-size: 0.9rem;">📖 阅读</span>
+        </header>
+        <div class="detail-title-area">
+            <h1 class="detail-title">加载中...</h1>
+            <div class="detail-meta"></div>
+        </div>
+        <div class="detail-body"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/katex-loader.js"></script>
+</body>
+
+</html>

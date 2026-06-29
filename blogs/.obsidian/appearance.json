@@ -1,0 +1,9 @@
+{
+  "cssTheme": "Velocity",
+  "enabledCssSnippets": [
+    "my-styles"
+  ],
+  "interfaceFontFamily": "仓耳今楷01",
+  "textFontFamily": "仓耳今楷01",
+  "monospaceFontFamily": "Comic Mono"
+}
