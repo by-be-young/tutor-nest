@@ -1,0 +1,689 @@
+/* ===== 分类页 & 详情页 共用组件 ===== */
+.category-container,
+.detail-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+}
+
+.category-header,
+.detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(120, 170, 155, 0.2);
+}
+
+.back-link {
+    font-size: 1.1rem;
+    color: var(--gray);
+    transition: color 0.25s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-link:hover {
+    color: #2d4a3a;
+}
+
+.subject-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #2d4a3a;
+}
+
+.subject-badge {
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 400;
+    background: rgba(120, 170, 155, 0.15);
+    padding: 2px 16px;
+    border-radius: 30px;
+    margin-left: 10px;
+    color: var(--gray);
+}
+
+.post-count {
+    font-size: 1rem;
+    color: var(--gray);
+    background: rgba(120, 170, 155, 0.15);
+    padding: 4px 16px;
+    border-radius: 30px;
+}
+
+/* 博客列表（原 blog-item 结构，现已改为树状，但保留兼容） */
+.blog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.blog-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(6px);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 16px var(--shadow);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.blog-item:hover {
+    transform: translateX(6px);
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.blog-item .blog-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #2d4a3a;
+}
+
+.blog-item .blog-title i {
+    margin-right: 8px;
+    opacity: 0.5;
+}
+
+.blog-item .blog-meta {
+    font-size: 0.9rem;
+    color: var(--gray);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.blog-item .series-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0 12px;
+    border-radius: 30px;
+    background: rgba(120, 170, 155, 0.12);
+}
+
+.blog-item .blog-arrow {
+    color: var(--gray);
+    opacity: 0.3;
+    transition: 0.3s;
+}
+
+.blog-item:hover .blog-arrow {
+    opacity: 0.9;
+    transform: translateX(4px);
+}
+
+.empty-tip {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray);
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+}
+
+/* ===== 树状列表样式 ===== */
+.tree-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.tree-item:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.tree-folder {
+    font-weight: 500;
+    color: #2d4a3a;
+}
+
+.tree-folder .folder-toggle {
+    width: 20px;
+    text-align: center;
+    color: var(--gray);
+}
+
+.tree-folder .folder-icon {
+    color: #7ab8a0;
+    margin-right: 4px;
+}
+
+.tree-folder .folder-name {
+    flex: 1;
+}
+
+.tree-folder .folder-count {
+    font-size: 0.75rem;
+    color: var(--gray);
+    background: rgba(120, 170, 155, 0.1);
+    padding: 0 10px;
+    border-radius: 30px;
+}
+
+.tree-file {
+    color: #2d4a3a;
+    padding-left: 40px;
+}
+
+.tree-file .file-icon {
+    color: var(--teal-dark);
+    margin-right: 4px;
+    width: 20px;
+    text-align: center;
+}
+
+.tree-file .file-name {
+    flex: 1;
+}
+
+.tree-file .file-date {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-right: 12px;
+}
+
+.tree-file .file-arrow {
+    color: var(--gray);
+    opacity: 0.3;
+    transition: 0.3s;
+}
+
+.tree-file:hover .file-arrow {
+    opacity: 0.9;
+    transform: translateX(4px);
+}
+
+.tree-children {
+    margin-left: 0;
+    border-left: 2px dashed rgba(120, 170, 155, 0.3);
+    margin-left: 20px;
+    padding-left: 0;
+}
+
+/* ===== 详情页特有 ===== */
+.detail-title-area {
+    margin-bottom: 32px;
+}
+
+.detail-title {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #2d4a3a;
+    margin-bottom: 8px;
+}
+
+.detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 1rem;
+    color: var(--gray);
+}
+
+.detail-meta .series-badge {
+    display: inline-block;
+    padding: 0 16px;
+    border-radius: 30px;
+    background: rgba(120, 170, 155, 0.12);
+    font-size: 0.85rem;
+}
+
+.detail-body {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(8px);
+    border-radius: 24px;
+    padding: 40px 48px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px var(--shadow);
+    line-height: 1.85;
+    color: #2d4a3a;
+    font-size: 1.05rem;
+}
+
+.detail-body h1 {
+    color: #2d8cf0;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 1.4em 0 0.8em 0;
+    border-left: 6px solid #2d8cf0;
+    padding: 10px 14px;
+    background: linear-gradient(90deg, rgba(234, 246, 255, 0.95) 0%, rgba(234, 246, 255, 0.6) 60%);
+    border-radius: 8px;
+}
+
+.detail-body h2 {
+    color: #19be6b;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 1.2em 0 0.75em 0;
+    border-left: 5px solid #19be6b;
+    padding: 9px 12px;
+    background: linear-gradient(90deg, rgba(234, 255, 243, 0.95) 0%, rgba(234, 255, 243, 0.6) 60%);
+    border-radius: 6px;
+}
+
+.detail-body h3 {
+    color: #ff8f9e;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 1.2em 0 0.8em 0;
+    border-left: 4px solid #ff8f9e;
+    padding: 8px 12px;
+    background: linear-gradient(90deg, rgba(255, 251, 230, 0.9) 0%, rgba(255, 251, 230, 0.6) 60%);
+    border-radius: 8px;
+}
+
+.detail-body p {
+    margin: 0.8em 0;
+}
+
+.detail-body ul,
+.detail-body ol {
+    padding-left: 1.8em;
+    margin: 0.6em 0;
+}
+
+.detail-body blockquote {
+    border-left: 4px solid var(--teal);
+    padding: 0.6em 1.2em;
+    margin: 1em 0;
+    background: rgba(120, 200, 190, 0.08);
+    border-radius: 0 12px 12px 0;
+}
+
+.detail-body code {
+    font-family: "Courier New", monospace;
+    background: rgba(120, 170, 155, 0.12);
+    padding: 0.15em 0.5em;
+    border-radius: 6px;
+    font-size: 0.9em;
+    color: #2a7a6a;
+}
+
+.detail-body pre {
+    background: #1a2a22;
+    color: #d4ece4;
+    padding: 18px 22px;
+    border-radius: 16px;
+    overflow-x: auto;
+    margin: 1.2em 0;
+}
+
+.detail-body pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+}
+
+.detail-body img {
+    max-width: 100%;
+    border-radius: 16px;
+    margin: 1em 0;
+}
+
+.detail-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+
+.detail-body th,
+.detail-body td {
+    border: 1px solid rgba(120, 170, 155, 0.2);
+    padding: 8px 14px;
+    text-align: left;
+}
+
+.detail-body th {
+    background: rgba(120, 170, 155, 0.08);
+}
+
+.detail-body strong,
+.detail-body b {
+    color: #d57587;
+}
+
+/* ===== 两栏布局（每个 h1 独立） ===== */
+.detail-section-two-column {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    border-bottom: 2px dashed rgba(120, 170, 155, 0.15);
+    padding-bottom: 32px;
+}
+
+.detail-section-two-column:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.detail-main-column {
+    flex: 2;
+    min-width: 0;
+}
+
+.detail-sidebar-column {
+    flex: 1;
+    min-width: 0;
+    max-width: 320px;
+    position: sticky;
+    top: 20px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    padding: 16px 20px;
+    border: 1px solid rgba(120, 170, 155, 0.15);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+.detail-sidebar-column h1,
+.detail-sidebar-column h2,
+.detail-sidebar-column h3 {
+    font-size: 0.9em;
+    margin-top: 0.6em;
+}
+
+.detail-sidebar-column h1 {
+    font-size: 1.2rem;
+    border-bottom: none;
+}
+
+.detail-sidebar-column h2 {
+    font-size: 1.1rem;
+}
+
+.detail-sidebar-column h3 {
+    font-size: 1rem;
+}
+
+.detail-sidebar-column p,
+.detail-sidebar-column li {
+    font-size: 0.9rem;
+}
+
+.detail-sidebar-column blockquote {
+    font-size: 0.9rem;
+    border-left-color: var(--teal);
+}
+
+.detail-sidebar-column code {
+    font-size: 0.85rem;
+}
+
+/* ============================================================
+   响应式设计（仅针对分类页和详情页）
+   ============================================================ */
+
+/* ----- 电脑端（大屏 ≥1024px）----- */
+@media (min-width: 1024px) {
+
+    .category-container,
+    .detail-container {
+        max-width: 1400px;
+        padding: 70px 60px 140px;
+    }
+
+    .back-link {
+        font-size: 1.2rem;
+    }
+
+    .subject-title {
+        font-size: 2.6rem;
+    }
+
+    .post-count {
+        font-size: 1.1rem;
+    }
+
+    .blog-item .blog-title {
+        font-size: 1.4rem;
+    }
+
+    .blog-item .blog-meta {
+        font-size: 1rem;
+    }
+
+    .detail-title {
+        font-size: 3.6rem;
+    }
+
+    .detail-meta {
+        font-size: 1.1rem;
+    }
+
+    .detail-body {
+        padding: 64px 72px;
+        font-size: 1.35rem;
+    }
+
+    .detail-body h1 {
+        font-size: 3rem;
+    }
+
+    .detail-body h2 {
+        font-size: 2.4rem;
+    }
+
+    .detail-body h3 {
+        font-size: 2rem;
+    }
+
+    .detail-body blockquote {
+        font-size: 1.15rem;
+    }
+
+    .detail-body code {
+        font-size: 0.95rem;
+    }
+
+    .tree-item {
+        font-size: 1.2rem;
+        padding: 12px 18px;
+    }
+
+    .tree-file .file-date {
+        font-size: 1rem;
+    }
+
+    .tree-folder .folder-count {
+        font-size: 0.95rem;
+    }
+
+    .detail-section-two-column {
+        gap: 56px;
+    }
+
+    .detail-sidebar-column {
+        max-width: 380px;
+        padding: 24px 28px;
+    }
+
+    .detail-sidebar-column h1 {
+        font-size: 1.45rem;
+    }
+
+    .detail-sidebar-column h2 {
+        font-size: 1.4rem;
+    }
+
+    .detail-sidebar-column h3 {
+        font-size: 1.35rem;
+    }
+
+    .detail-sidebar-column p,
+    .detail-sidebar-column li {
+        font-size: 1.3rem;
+    }
+
+    .detail-sidebar-column blockquote {
+        font-size: 1rem;
+    }
+
+    .detail-sidebar-column code {
+        font-size: 0.9rem;
+    }
+}
+
+/* ----- 平板端（641px ~ 1023px）----- */
+@media (min-width: 641px) and (max-width: 1023px) {
+
+    .category-container,
+    .detail-container {
+        max-width: 100%;
+        padding: 40px 32px 80px;
+    }
+
+    .detail-section-two-column {
+        gap: 30px;
+    }
+
+    .detail-sidebar-column {
+        max-width: 280px;
+        padding: 14px 18px;
+    }
+}
+
+/* ----- 手机端（≤640px）----- */
+@media (max-width: 640px) {
+
+    .category-container,
+    .detail-container {
+        padding: 20px 16px 40px;
+    }
+
+    .category-header,
+    .detail-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        margin-bottom: 24px;
+        padding-bottom: 14px;
+        gap: 10px;
+    }
+
+    .back-link {
+        justify-content: center;
+        font-size: 0.95rem;
+    }
+
+    .subject-title {
+        font-size: 1.6rem;
+    }
+
+    .post-count {
+        font-size: 0.85rem;
+        align-self: center;
+    }
+
+    .blog-list {
+        gap: 10px;
+    }
+
+    .blog-item {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .blog-item .blog-title {
+        font-size: 1rem;
+    }
+
+    .blog-item .blog-meta {
+        font-size: 0.75rem;
+    }
+
+    .detail-title {
+        font-size: 1.6rem;
+    }
+
+    .detail-meta {
+        font-size: 0.85rem;
+        gap: 10px;
+    }
+
+    .detail-body {
+        padding: 20px 18px;
+        font-size: 0.95rem;
+    }
+
+    .detail-body h1 {
+        font-size: 1.6rem;
+    }
+
+    .detail-body h2 {
+        font-size: 1.3rem;
+    }
+
+    .detail-body h3 {
+        font-size: 1.1rem;
+    }
+
+    .tree-item {
+        font-size: 0.9rem;
+        padding: 6px 10px;
+    }
+
+    .tree-file {
+        flex-wrap: wrap;
+        gap: 4px;
+        padding-left: 28px !important;
+    }
+
+    .tree-file .file-date {
+        margin-right: 0;
+        width: 100%;
+        padding-left: 24px;
+        font-size: 0.7rem;
+    }
+
+    .tree-children {
+        margin-left: 12px;
+        padding-left: 0;
+    }
+
+    .tree-folder .folder-count {
+        font-size: 0.7rem;
+    }
+
+    .tree-folder-wrapper {
+        padding-left: 8px !important;
+    }
+
+    /* 手机端两栏恢复单栏 */
+    .detail-section-two-column {
+        flex-direction: column;
+        gap: 12px;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .detail-sidebar-column {
+        max-width: 100%;
+        position: static;
+        border-top: 2px dashed rgba(120, 170, 155, 0.2);
+        padding-top: 16px;
+        margin-top: 4px;
+        border-radius: 0;
+        background: transparent;
+        padding: 12px 0 0 0;
+        border: none;
+        max-height: none;
+        overflow-y: visible;
+    }
+}

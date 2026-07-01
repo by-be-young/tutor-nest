@@ -14,25 +14,51 @@
         <div class="deco-dot dot1"></div>
         <div class="deco-dot dot2"></div>
         <div class="home-content">
-            <h1 class="home-title">📖 学习资料基地</h1>
+            <h1 class="home-title">📖 学习资料仓库</h1>
             <p class="home-subtitle">选择科目，开始学习</p>
-            <div class="subject-cards">
-                <a href="category.html?subject=英语" class="subject-card card-english">
-                    <div class="card-icon"><i class="fas fa-language"></i></div>
-                    <div class="card-name">英语</div>
-                    <div class="card-desc">语法逻辑构筑</div>
-                    <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
-                </a>
-                <a href="category.html?subject=化学" class="subject-card card-chemistry">
-                    <div class="card-icon"><i class="fas fa-flask"></i></div>
-                    <div class="card-name">化学</div>
-                    <div class="card-desc">宏观微观交织</div>
-                    <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
-                </a>
+
+            <!-- 登录区域（未登录时显示） -->
+            <div id="login-area" class="login-box">
+                <h2>🔐 登录</h2>
+                <p class="sub">请输入您的用户名</p>
+                <form id="login-form">
+                    <input type="text" id="login-username" placeholder="你的用户名" required autofocus />
+                    <div class="login-actions">
+                        <button type="submit" class="login-btn">登录</button>
+                        <button type="button" id="register-btn" class="register-btn">注册</button>
+                    </div>
+                    <div id="login-error" class="login-error"></div>
+                </form>
+                <div class="login-info">💡 新注册用户默认无权限</div>
             </div>
+
+            <!-- 科目卡片（登录后显示） -->
+            <div id="subject-cards-wrapper" class="subject-cards-wrapper">
+                <!-- 退出登录按钮（放在科目卡片上方） -->
+                <button id="logout-btn" class="logout-btn-primary">
+                    <i class="fas fa-sign-out-alt"></i> 退出登录
+                </button>
+                <!-- 滚动容器 -->
+                <div class="subject-cards-scroll" id="subject-cards-scroll">
+                    <div class="subject-cards" id="subject-cards-container">
+                        <!-- 由 home.js 动态渲染 -->
+                    </div>
+                </div>
+            </div>
+
             <footer class="home-footer"><span>✨ 从全新角度理解高中知识 ✨</span></footer>
         </div>
     </div>
+
+    <!-- 引入 Supabase 和业务逻辑 -->
+    <script type="importmap">
+        {
+            "imports": {
+                "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+            }
+        }
+    </script>
+    <script type="module" src="js/home.js"></script>
 </body>
 
 </html>

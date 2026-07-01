@@ -1,3 +1,7 @@
+// js/main.js (修改版)
+import { supabase } from './supabase-client.js';
+import { getCurrentUser, hasPermission, getPermissionIds } from './auth.js';
+
 let blogData = [];
 
 function getQueryParam(name) {
@@ -39,149 +43,13 @@ function renderMarkdown(markdown) {
     return `<pre>${markdown}</pre>`;
 }
 
-/**
- * 解析 Markdown，为每个 h1 标题提取侧边栏内容
- * 规则：每个 h1 标题下的两个 "---" 之间的内容作为该 h1 的侧边栏
- * 返回 [{ h1: '标题内容', mainContent: '正文', sidebarContent: '侧边栏' }]
- */
-function parseMarkdownWithSidebar(markdown) {
-    const lines = markdown.split('\n');
-    const sections = [];
-    let currentSection = null;
-    let i = 0;
-
-    while (i < lines.length) {
-        const trimmed = lines[i].trim();
-
-        // 找到 h1 标题
-        if (trimmed.startsWith('# ')) {
-            // 保存之前的 section
-            if (currentSection) {
-                sections.push(currentSection);
-            }
-
-            // 创建新的 section
-            currentSection = {
-                h1: trimmed,
-                mainContent: [],
-                sidebarContent: [],
-                isCollectingMain: true,
-                hasSeenFirstSep: false,
-                hasSeenSecondSep: false
-            };
-
-            // h1 之后的内容开始收集到 main
-            currentSection.isCollectingMain = true;
-            i++;
-            continue;
-        }
-
-        // 如果当前没有 section，跳过
-        if (!currentSection) {
-            i++;
-            continue;
-        }
-
-        // 处理分割线
-        if (trimmed === '---') {
-            if (!currentSection.hasSeenFirstSep) {
-                // 第一个分割线：开始收集侧边栏
-                currentSection.hasSeenFirstSep = true;
-                currentSection.isCollectingMain = false;
-                i++;
-                continue;
-            } else if (!currentSection.hasSeenSecondSep) {
-                // 第二个分割线：结束侧边栏，回到正文
-                currentSection.hasSeenSecondSep = true;
-                currentSection.isCollectingMain = true;
-                i++;
-                continue;
-            } else {
-                // 第三个及以后的分割线：当作普通内容
-                if (currentSection.isCollectingMain) {
-                    currentSection.mainContent.push(lines[i]);
-                } else {
-                    currentSection.sidebarContent.push(lines[i]);
-                }
-                i++;
-                continue;
-            }
-        }
-
-        // 收集内容
-        if (currentSection.isCollectingMain) {
-            currentSection.mainContent.push(lines[i]);
-        } else {
-            currentSection.sidebarContent.push(lines[i]);
-        }
-
-        i++;
-    }
-
-    // 保存最后一个 section
-    if (currentSection) {
-        sections.push(currentSection);
-    }
-
-    return sections;
-}
-
-/**
- * 渲染带有侧边栏的 Markdown
- */
-function renderMarkdownWithSidebar(markdown, isDesktop) {
-    if (!isDesktop) {
-        // 手机端：直接渲染全部内容（移除所有 ---）
-        const cleaned = markdown.replace(/^---\s*$/gm, '');
-        return renderMarkdown(cleaned);
-    }
-
-    // 电脑端：解析每个 h1 的侧边栏
-    const sections = parseMarkdownWithSidebar(markdown);
-
-    if (sections.length === 0) {
-        return renderMarkdown(markdown);
-    }
-
-    let html = '';
-
-    sections.forEach(section => {
-        const mainMd = section.mainContent.join('\n').trim();
-        const sidebarMd = section.sidebarContent.join('\n').trim();
-
-        // 如果侧边栏为空，直接渲染正文
-        if (!sidebarMd) {
-            html += renderMarkdown(section.h1 + '\n' + mainMd);
-            return;
-        }
-
-        // 有侧边栏：两栏布局
-        const mainHtml = renderMarkdown(section.h1 + '\n' + mainMd);
-        const sidebarHtml = renderMarkdown(sidebarMd);
-
-        html += `
-            <div class="detail-section-two-column">
-                <div class="detail-main-column">
-                    ${mainHtml}
-                </div>
-                <div class="detail-sidebar-column">
-                    ${sidebarHtml}
-                </div>
-            </div>
-        `;
-    });
-
-    return html;
-}
-
+// 构建树（与之前一致）
 function buildTree(blogs) {
     const root = { children: [] };
-
     blogs.forEach(blog => {
         const parts = blog.path.split('/');
         const dirParts = parts.slice(1);
         const title = blog.title;
-
         let current = root;
         for (let i = 0; i < dirParts.length; i++) {
             const part = dirParts[i];
@@ -199,32 +67,22 @@ function buildTree(blogs) {
             } else {
                 let dirNode = current.children.find(child => child.name === part && !child.isFile);
                 if (!dirNode) {
-                    dirNode = {
-                        name: part,
-                        isFile: false,
-                        children: []
-                    };
+                    dirNode = { name: part, isFile: false, children: [] };
                     current.children.push(dirNode);
                 }
                 current = dirNode;
             }
         }
     });
-
     function sortNode(node) {
         if (!node.children) return;
         node.children.sort((a, b) => {
-            if (a.isFile !== b.isFile) {
-                return a.isFile ? 1 : -1;
-            }
+            if (a.isFile !== b.isFile) return a.isFile ? 1 : -1;
             return a.name.localeCompare(b.name);
         });
-        node.children.forEach(child => {
-            if (!child.isFile) sortNode(child);
-        });
+        node.children.forEach(child => { if (!child.isFile) sortNode(child); });
     }
     sortNode(root);
-
     return root;
 }
 
@@ -262,30 +120,47 @@ function renderTree(children, depth = 0) {
     return html;
 }
 
+// 分类页初始化（增加权限过滤）
 async function initCategory() {
+    // 检查登录状态
+    const user = getCurrentUser();
+    if (!user) {
+        document.querySelector('.category-container').innerHTML = `
+            <div class="empty-tip">
+                请先 <a href="index.html" style="color: var(--teal-dark);">登录</a> 后查看。
+            </div>
+        `;
+        return;
+    }
+
     await loadData();
     const subject = getQueryParam('subject');
     const container = document.querySelector('.category-container');
     if (!subject) {
-        container.innerHTML = `<div class="empty-tip">请从首页选择科目。<br><a href="index.html" style="color: var(--blue-dark);">返回首页</a></div>`;
+        container.innerHTML = `<div class="empty-tip">请从首页选择科目。<br><a href="index.html" style="color: var(--teal-dark);">返回首页</a></div>`;
         return;
     }
 
-    const blogs = blogData.filter(b => b.series === subject).sort((a, b) => new Date(b.date) - new Date(a.date));
+    // 获取该科目下所有文章
+    let blogs = blogData.filter(b => b.series === subject);
+    // 根据当前用户的权限过滤
+    const permissionIds = getPermissionIds().map(Number).filter(Number.isFinite);
+    blogs = blogs.filter(b => permissionIds.includes(Number(b.id)));
+
+    if (blogs.length === 0) {
+        container.innerHTML = `<div class="empty-tip">您没有权限查看该科目的任何文章。<br><a href="index.html" style="color: var(--teal-dark);">返回首页</a></div>`;
+        return;
+    }
 
     document.querySelector('.subject-title').innerHTML = `${subject} <span class="subject-badge">📂</span>`;
     document.querySelector('.post-count').textContent = `${blogs.length} 篇`;
 
     const listEl = document.querySelector('.blog-list');
-    if (blogs.length === 0) {
-        listEl.innerHTML = `<div class="empty-tip">该科目暂无文章。</div>`;
-        return;
-    }
-
     const tree = buildTree(blogs);
     const html = renderTree(tree.children, 0);
     listEl.innerHTML = html;
 
+    // 事件绑定（与之前一致）
     listEl.addEventListener('click', function (e) {
         const folder = e.target.closest('.tree-folder');
         if (folder) {
@@ -294,17 +169,14 @@ async function initCategory() {
             if (!wrapper) return;
             const childrenContainer = wrapper.querySelector('.tree-children');
             if (!childrenContainer) return;
-
             const isHidden = childrenContainer.style.display === 'none';
             childrenContainer.style.display = isHidden ? 'block' : 'none';
-
             const toggleIcon = folder.querySelector('.folder-toggle i');
             if (toggleIcon) {
                 toggleIcon.className = isHidden ? 'fas fa-chevron-down' : 'fas fa-chevron-right';
             }
             return;
         }
-
         const file = e.target.closest('.tree-file');
         if (file) {
             const id = file.dataset.id;
@@ -315,23 +187,39 @@ async function initCategory() {
     });
 }
 
+// 详情页初始化（增加权限检查）
 async function initDetail() {
+    const user = getCurrentUser();
+    if (!user) {
+        document.querySelector('.detail-container').innerHTML = `
+            <div class="empty-tip">
+                请先 <a href="index.html" style="color: var(--teal-dark);">登录</a> 后查看。
+            </div>
+        `;
+        return;
+    }
+
     await loadData();
     const idStr = getQueryParam('id');
     const container = document.querySelector('.detail-container');
     if (!idStr) {
-        container.innerHTML = `<div class="empty-tip">文章不存在。<br><a href="index.html" style="color: var(--blue-dark);">返回首页</a></div>`;
+        container.innerHTML = `<div class="empty-tip">文章不存在。<br><a href="index.html" style="color: var(--teal-dark);">返回首页</a></div>`;
         return;
     }
     const id = parseInt(idStr, 10);
     const blog = blogData.find(b => b.id === id);
     if (!blog) {
-        container.innerHTML = `<div class="empty-tip">文章未找到。<br><a href="index.html" style="color: var(--blue-dark);">返回首页</a></div>`;
+        container.innerHTML = `<div class="empty-tip">文章未找到。<br><a href="index.html" style="color: var(--teal-dark);">返回首页</a></div>`;
+        return;
+    }
+
+    // 权限检查
+    if (!hasPermission(id)) {
+        container.innerHTML = `<div class="empty-tip">您没有权限查看此文章。<br><a href="index.html" style="color: var(--teal-dark);">返回首页</a></div>`;
         return;
     }
 
     const content = await loadMarkdownContent(blog.path);
-
     document.querySelector('.detail-title').textContent = blog.title;
     document.querySelector('.detail-meta').innerHTML = `
         <span class="series-badge">📂 ${blog.series}</span>
@@ -342,6 +230,93 @@ async function initDetail() {
     document.querySelector('.detail-body').innerHTML = renderMarkdownWithSidebar(content, isDesktop);
 }
 
+// 侧边栏渲染（与之前相同）
+function parseMarkdownWithSidebar(markdown) {
+    const lines = markdown.split('\n');
+    const sections = [];
+    let currentSection = null;
+    let i = 0;
+    while (i < lines.length) {
+        const trimmed = lines[i].trim();
+        if (trimmed.startsWith('# ')) {
+            if (currentSection) sections.push(currentSection);
+            currentSection = {
+                h1: trimmed,
+                mainContent: [],
+                sidebarContent: [],
+                isCollectingMain: true,
+                hasSeenFirstSep: false,
+                hasSeenSecondSep: false
+            };
+            currentSection.isCollectingMain = true;
+            i++;
+            continue;
+        }
+        if (!currentSection) { i++; continue; }
+        if (trimmed === '---') {
+            if (!currentSection.hasSeenFirstSep) {
+                currentSection.hasSeenFirstSep = true;
+                currentSection.isCollectingMain = false;
+                i++;
+                continue;
+            } else if (!currentSection.hasSeenSecondSep) {
+                currentSection.hasSeenSecondSep = true;
+                currentSection.isCollectingMain = true;
+                i++;
+                continue;
+            } else {
+                if (currentSection.isCollectingMain) {
+                    currentSection.mainContent.push(lines[i]);
+                } else {
+                    currentSection.sidebarContent.push(lines[i]);
+                }
+                i++;
+                continue;
+            }
+        }
+        if (currentSection.isCollectingMain) {
+            currentSection.mainContent.push(lines[i]);
+        } else {
+            currentSection.sidebarContent.push(lines[i]);
+        }
+        i++;
+    }
+    if (currentSection) sections.push(currentSection);
+    return sections;
+}
+
+function renderMarkdownWithSidebar(markdown, isDesktop) {
+    if (!isDesktop) {
+        const cleaned = markdown.replace(/^---\s*$/gm, '');
+        return renderMarkdown(cleaned);
+    }
+    const sections = parseMarkdownWithSidebar(markdown);
+    if (sections.length === 0) return renderMarkdown(markdown);
+    let html = '';
+    sections.forEach(section => {
+        const mainMd = section.mainContent.join('\n').trim();
+        const sidebarMd = section.sidebarContent.join('\n').trim();
+        if (!sidebarMd) {
+            html += renderMarkdown(section.h1 + '\n' + mainMd);
+            return;
+        }
+        const mainHtml = renderMarkdown(section.h1 + '\n' + mainMd);
+        const sidebarHtml = renderMarkdown(sidebarMd);
+        html += `
+            <div class="detail-section-two-column">
+                <div class="detail-main-column">
+                    ${mainHtml}
+                </div>
+                <div class="detail-sidebar-column">
+                    ${sidebarHtml}
+                </div>
+            </div>
+        `;
+    });
+    return html;
+}
+
+// 页面初始化路由
 document.addEventListener('DOMContentLoaded', function () {
     const path = window.location.pathname;
     if (path.includes('category.html')) {
@@ -349,14 +324,14 @@ document.addEventListener('DOMContentLoaded', function () {
     } else if (path.includes('detail.html')) {
         initDetail();
     }
+    // 其他页面（如 index.html）独立处理
 });
 
+// 窗口resize重新加载详情（可选）
 let resizeTimer;
 window.addEventListener('resize', function () {
     if (window.location.pathname.includes('detail.html')) {
         clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            initDetail();
-        }, 300);
+        resizeTimer = setTimeout(() => { initDetail(); }, 300);
     }
 });
