@@ -909,7 +909,7 @@ async function initDetail() {
     if (detailState.questionCount === 0) {
         setActionStatus('当前文章没有可提交的题目', 'info');
     } else if (mode === 'study') {
-        setActionStatus('填写答案后点击提交，或离开页面前会自动提交一次', 'info');
+        setActionStatus('填写答案后点击提交', 'info');
     } else if (mode === 'review') {
         setActionStatus('点击图标即可完成批阅', 'info');
     } else {
