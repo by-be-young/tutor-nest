@@ -1,4 +1,8 @@
-/* ===== 分类页 & 详情页 共用组件 ===== */
+/* ============================================================
+   category-and-detail.css - 分类页 & 详情页样式
+   ============================================================ */
+
+/* ----- 容器 ----- */
 .category-container,
 .detail-container {
     max-width: 900px;
@@ -6,6 +10,7 @@
     padding: 40px 32px 80px;
 }
 
+/* ----- 头部 ----- */
 .category-header,
 .detail-header {
     display: flex;
@@ -56,70 +61,6 @@
     border-radius: 30px;
 }
 
-/* 博客列表（原 blog-item 结构，现已改为树状，但保留兼容） */
-.blog-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.blog-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 24px;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(6px);
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 16px var(--shadow);
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.blog-item:hover {
-    transform: translateX(6px);
-    background: rgba(255, 255, 255, 0.85);
-}
-
-.blog-item .blog-title {
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: #2d4a3a;
-}
-
-.blog-item .blog-title i {
-    margin-right: 8px;
-    opacity: 0.5;
-}
-
-.blog-item .blog-meta {
-    font-size: 0.9rem;
-    color: var(--gray);
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-.blog-item .series-tag {
-    display: inline-block;
-    font-size: 0.75rem;
-    padding: 0 12px;
-    border-radius: 30px;
-    background: rgba(120, 170, 155, 0.12);
-}
-
-.blog-item .blog-arrow {
-    color: var(--gray);
-    opacity: 0.3;
-    transition: 0.3s;
-}
-
-.blog-item:hover .blog-arrow {
-    opacity: 0.9;
-    transform: translateX(4px);
-}
-
 .empty-tip {
     text-align: center;
     padding: 60px 20px;
@@ -128,7 +69,7 @@
     border-radius: 24px;
 }
 
-/* ===== 树状列表样式 ===== */
+/* ----- 树状列表（分类页 & 详情页共用） ----- */
 .tree-item {
     display: flex;
     align-items: center;
@@ -206,13 +147,93 @@
 }
 
 .tree-children {
-    margin-left: 0;
-    border-left: 2px dashed rgba(120, 170, 155, 0.3);
     margin-left: 20px;
     padding-left: 0;
+    border-left: 2px dashed rgba(120, 170, 155, 0.3);
 }
 
-/* ===== 详情页特有 ===== */
+.tree-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    margin-left: 8px;
+    white-space: nowrap;
+}
+
+.tree-badge.is-warning {
+    background: rgba(242, 172, 172, 0.55);
+    color: #7b2020;
+    border: 1px solid rgba(227, 124, 124, 0.32);
+}
+
+/* ----- 分类页列表（兼容旧结构） ----- */
+.blog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.blog-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(6px);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 16px var(--shadow);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.blog-item:hover {
+    transform: translateX(6px);
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.blog-item .blog-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #2d4a3a;
+}
+
+.blog-item .blog-title i {
+    margin-right: 8px;
+    opacity: 0.5;
+}
+
+.blog-item .blog-meta {
+    font-size: 0.9rem;
+    color: var(--gray);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.blog-item .series-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0 12px;
+    border-radius: 30px;
+    background: rgba(120, 170, 155, 0.12);
+}
+
+.blog-item .blog-arrow {
+    color: var(--gray);
+    opacity: 0.3;
+    transition: 0.3s;
+}
+
+.blog-item:hover .blog-arrow {
+    opacity: 0.9;
+    transform: translateX(4px);
+}
+
+/* ----- 详情页标题区 ----- */
 .detail-title-area {
     margin-bottom: 32px;
 }
@@ -317,6 +338,7 @@
     color: #6d6b58;
 }
 
+/* ----- 题目卡片 ----- */
 .question-slot {
     display: block;
     margin: 18px 0;
@@ -365,7 +387,6 @@
     box-shadow: 0 0 0 4px rgba(243, 227, 162, 0.25);
 }
 
-/* 查看答案时文本框高亮 */
 .question-textarea.is-showing-answer {
     background: #eaffea !important;
     border-color: #4caf50 !important;
@@ -525,21 +546,28 @@
     box-shadow: none;
 }
 
-.tree-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0 10px;
-    border-radius: 999px;
-    font-size: 1rem;
-    margin-left: 8px;
-    white-space: nowrap;
+.question-reference-wrapper {
+    margin-top: 4px;
+    padding: 10px 14px;
+    background: rgba(245, 248, 250, 0.8);
+    border-radius: 12px;
+    border-left: 3px solid #7ab8a0;
 }
 
-.tree-badge.is-warning {
-    background: rgba(242, 172, 172, 0.55);
-    color: #7b2020;
-    border: 1px solid rgba(227, 124, 124, 0.32);
+.question-reference-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4c6b5b;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.question-reference-text {
+    font-size: 0.95rem;
+    color: #2d4a3a;
+    padding: 4px 0;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .sr-only {
@@ -554,6 +582,7 @@
     border: 0;
 }
 
+/* ----- 详情正文 ----- */
 .detail-body {
     background: rgba(255, 255, 255, 0.55);
     backdrop-filter: blur(8px);
@@ -669,7 +698,7 @@
     color: #d57587;
 }
 
-/* ===== 两栏布局（每个 h1 独立） ===== */
+/* ----- 两栏布局 ----- */
 .detail-section-two-column {
     display: flex;
     gap: 40px;
@@ -738,32 +767,7 @@
     font-size: 0.85rem;
 }
 
-/* 批阅界面 - 参考答案区域 */
-.question-reference-wrapper {
-    margin-top: 4px;
-    padding: 10px 14px;
-    background: rgba(245, 248, 250, 0.8);
-    border-radius: 12px;
-    border-left: 3px solid #7ab8a0;
-}
-
-.question-reference-label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #4c6b5b;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.question-reference-text {
-    font-size: 0.95rem;
-    color: #2d4a3a;
-    padding: 4px 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-/* ===== 悬浮按钮 (FAB) ===== */
+/* ----- 悬浮按钮 (FAB) ----- */
 .fab-container {
     position: fixed;
     bottom: 30px;
@@ -774,7 +778,7 @@
 .fab-btn {
     width: 156px;
     height: 56px;
-    border-radius: 10%;
+    border-radius: 28px;
     border: none;
     background: linear-gradient(135deg, rgba(255, 248, 214, 0.98), rgba(243, 227, 162, 0.92));
     color: #705d13;
@@ -802,13 +806,10 @@
     transform: none;
 }
 
-
-
 /* ============================================================
-   响应式设计（仅针对分类页和详情页）
+   响应式
    ============================================================ */
 
-/* ----- 电脑端（大屏 ≥1024px）----- */
 @media (min-width: 1024px) {
 
     .category-container,
@@ -827,14 +828,6 @@
 
     .post-count {
         font-size: 1.1rem;
-    }
-
-    .blog-item .blog-title {
-        font-size: 1.4rem;
-    }
-
-    .blog-item .blog-meta {
-        font-size: 1rem;
     }
 
     .detail-title {
@@ -918,7 +911,6 @@
     }
 }
 
-/* ----- 平板端（641px ~ 1023px）----- */
 @media (min-width: 641px) and (max-width: 1023px) {
 
     .category-container,
@@ -937,7 +929,6 @@
     }
 }
 
-/* ----- 手机端（≤640px）----- */
 @media (max-width: 640px) {
 
     .category-container,
@@ -967,24 +958,6 @@
     .post-count {
         font-size: 0.85rem;
         align-self: center;
-    }
-
-    .blog-list {
-        gap: 10px;
-    }
-
-    .blog-item {
-        padding: 12px 16px;
-        flex-wrap: wrap;
-        gap: 4px;
-    }
-
-    .blog-item .blog-title {
-        font-size: 1rem;
-    }
-
-    .blog-item .blog-meta {
-        font-size: 0.75rem;
     }
 
     .detail-title {
@@ -1044,7 +1017,6 @@
         padding-left: 8px !important;
     }
 
-    /* 手机端两栏恢复单栏 */
     .detail-section-two-column {
         flex-direction: column;
         gap: 12px;
@@ -1055,18 +1027,13 @@
     .detail-sidebar-column {
         max-width: 100%;
         position: static;
-        border-top: 2px dashed rgba(120, 170, 155, 0.2);
-        padding-top: 16px;
-        margin-top: 4px;
-        border-radius: 0;
-        background: transparent;
         padding: 12px 0 0 0;
         border: none;
         max-height: none;
         overflow-y: visible;
+        background: transparent;
     }
 
-    /* 手机端调整 */
     .fab-container {
         bottom: 20px;
         right: 20px;
@@ -1078,4 +1045,17 @@
         font-size: 1.2rem;
     }
 
+    .blog-item {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .blog-item .blog-title {
+        font-size: 1rem;
+    }
+
+    .blog-item .blog-meta {
+        font-size: 0.75rem;
+    }
 }

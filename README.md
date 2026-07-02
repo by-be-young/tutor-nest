@@ -123,6 +123,229 @@ $$ c = \sqrt{3^2 + 4^2} = 5 $$
 
 ---
 
+# 代码编写规范
+
+## 一、总体原则
+
+1. **一致性优先**：同一功能使用相同的写法，不混用风格。
+2. **语义化命名**：名称应清晰表达意图，避免缩写（除非约定俗成）。
+3. **渐进增强**：核心功能在所有浏览器可用，样式和交互逐步增强。
+4. **文件组织**：按功能拆分文件，避免单个文件过大。
+
+---
+
+## 二、HTML 规范
+
+### 2.1 文档结构
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面标题</title>
+    <!-- CSS 放在 head 中 -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 页面内容 -->
+    <!-- JS 放在 body 末尾 -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
+```
+
+### 2.2 命名
+
+- `id` 使用 **kebab-case**（如 `login-area`、`subject-cards-wrapper`）
+- `class` 使用 **kebab-case**（如 `detail-title`、`question-card`）
+- 布尔属性（如 `disabled`、`checked`）不写值
+
+### 2.3 语义化标签
+
+- 使用 `<header>`、`<footer>`、`<main>`、`<section>`、`<nav>` 代替通用 `<div>`
+- 按钮使用 `<button>` 而非 `<div>` 模拟
+- 链接使用 `<a>`，明确 `href`
+
+### 2.4 表单
+
+- 所有 `<input>` 配有 `<label>`（使用 `for` 或包裹）
+- 提交按钮设置 `type="submit"`，普通按钮设置 `type="button"`
+
+---
+
+## 三、CSS 规范
+
+### 3.1 文件组织
+
+```
+css/
+├── style.css              # 首页样式
+├── category-and-detail.css # 分类页 & 详情页
+└── admin.css              # 管理员页
+```
+
+- 每个文件只负责对应页面的样式，不混用。
+- 公共变量（颜色、间距）使用 CSS 自定义属性（`--var`）统一管理。
+
+### 3.2 命名约定（BEM 变体）
+
+- **块（Block）**：独立组件，如 `.subject-card`
+- **元素（Element）**：块的子部分，用 `__` 连接，如 `.subject-card__title`
+- **修饰符（Modifier）**：状态或变体，用 `--` 或 `is-`，如 `.subject-card--large`、`.is-active`
+
+> 本项目中使用 `is-` 前缀表示状态（如 `is-active`、`is-hidden`），使用 `--` 表示尺寸或颜色变体（如 `card-english`）。
+
+### 3.3 选择器
+
+- 避免超过 3 层嵌套
+- 不使用 `!important`（除非覆盖第三方库）
+- 类名优先于标签选择器（`.btn` 优于 `button`）
+
+### 3.4 响应式
+
+- 使用 **移动优先** 或 **桌面优先** 策略，但需统一。
+- 断点使用：
+  - `640px` 以下：手机
+  - `641px ~ 1023px`：平板
+  - `1024px` 及以上：桌面
+
+```css
+@media (max-width: 640px) { /* 手机 */ }
+@media (min-width: 641px) and (max-width: 1023px) { /* 平板 */ }
+@media (min-width: 1024px) { /* 桌面 */ }
+```
+
+---
+
+## 四、JavaScript 规范
+
+### 4.1 文件组织
+
+```
+js/
+├── main.js           # 分类页 & 详情页逻辑
+├── home.js           # 首页逻辑
+├── admin.js          # 管理员页逻辑
+├── auth.js           # 登录/注册/权限
+├── data-loader.js    # 数据加载
+└── supabase-client.js # Supabase 客户端
+```
+
+- 每个文件使用 ES Module（`import` / `export`）。
+- 入口 HTML 通过 `<script type="module">` 引入。
+
+### 4.2 命名
+
+- **变量 / 函数**：`camelCase`（如 `getCurrentUser`、`questionIdList`）
+- **常量**：`UPPER_SNAKE_CASE`（如 `SUPABASE_URL`）
+- **类 / 构造函数**：`PascalCase`（如 `DetailState`）
+- **布尔变量**：以 `is`、`has`、`should` 开头（如 `isDesktop`、`hasPermission`）
+
+### 4.3 函数
+
+- 单一职责，每个函数只做一件事。
+- 函数名使用动词开头（如 `loadData`、`renderSubjects`）。
+- 参数尽量少（不超过 3 个），过多时使用对象参数。
+
+### 4.4 异步操作
+
+- 使用 `async / await` 代替回调或 `.then` 链。
+- 捕获错误使用 `try / catch`，并记录或提示用户。
+
+```javascript
+async function fetchData() {
+    try {
+        const res = await fetch(url);
+        return await res.json();
+    } catch (error) {
+        console.error('加载失败:', error);
+        return null;
+    }
+}
+```
+
+### 4.5 DOM 操作
+
+- 使用 `querySelector` / `querySelectorAll`，避免 `getElementById`（除非必要）。
+- 批量 DOM 操作使用 `DocumentFragment` 或 `innerHTML` 一次性插入。
+- 事件监听使用 `addEventListener`，避免 `onclick` 属性。
+
+### 4.6 状态管理
+
+- 页面状态集中在一个对象中（如 `detailState`），避免散落在全局变量。
+- 状态变更通过函数封装，不要直接修改。
+
+### 4.7 调试输出
+
+- 开发阶段保留关键 `console.log`，生产环境应移除或使用日志级别控制。
+- 错误日志使用 `console.error`，警告使用 `console.warn`。
+
+---
+
+## 五、注释规范
+
+### 5.1 文件头
+
+每个 JS / CSS 文件顶部注明用途：
+
+```javascript
+// js/main.js - 分类页与详情页渲染、题目交互、提交与批阅逻辑
+```
+
+```css
+/* css/style.css - 首页样式（登录框、科目卡片、用户信息栏） */
+```
+
+### 5.2 函数注释（JSDoc 风格）
+
+```javascript
+/**
+ * 加载学生提交记录
+ * @param {number} blogId - 文章ID
+ * @param {number|string} studentId - 学生ID
+ * @returns {Promise<Map>} 提交记录 Map，键为 question_id
+ */
+async function loadQuestionSubmissions(blogId, studentId) {
+    // ...
+}
+```
+
+### 5.3 复杂逻辑注释
+
+- 在复杂条件、算法、正则表达式前添加注释说明意图。
+- 不要注释显而易见的代码（如 `i++`），注释应解释“为什么”而不是“是什么”。
+
+---
+
+## 六、Git 提交规范
+
+- 提交信息使用 **动词 + 简短描述**，如：
+  - `feat: 添加用户登录功能`
+  - `fix: 修复历史记录不显示的问题`
+  - `style: 调整首页卡片布局`
+  - `refactor: 重构题目卡片渲染逻辑`
+- 每次提交保持原子性（一个功能 / 一个修复）。
+
+---
+
+## 七、第三方库
+
+- 使用 CDN 加载时，指定具体版本号（如 `@0.16.9`）。
+- 如需更新版本，先测试兼容性。
+- 尽量不要引入过多库，保持项目轻量。
+
+---
+
+## 八、安全
+
+- 用户输入内容在插入 DOM 前进行转义（使用 `escapeHtml` 等函数）。
+- Supabase 密钥仅用于前端，切勿暴露敏感密钥（已使用 ANON_KEY）。
+- 权限校验同时在服务端（RLS）和客户端进行，不信任前端数据。
+
+---
+
 ## 📄 许可证
 
 MIT License

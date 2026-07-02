@@ -9,7 +9,7 @@
     min-height: 100vh;
 }
 
-/* ===== 导航栏 ===== */
+/* ----- 导航栏 ----- */
 .admin-nav {
     display: flex;
     flex-wrap: wrap;
@@ -53,18 +53,6 @@
     flex-wrap: wrap;
 }
 
-.admin-nav-tab {
-    background: rgba(255, 255, 255, 0.72);
-    color: #4e6658;
-    border: 1px solid rgba(120, 170, 155, 0.18);
-}
-
-.admin-nav-tab.is-active {
-    background: linear-gradient(135deg, rgba(255, 248, 214, 0.98), rgba(243, 227, 162, 0.92));
-    color: #705d13;
-    border-color: rgba(224, 199, 106, 0.45);
-}
-
 .admin-nav-right select {
     padding: 8px 16px;
     border-radius: 30px;
@@ -74,7 +62,7 @@
     cursor: pointer;
 }
 
-/* ===== 通用按钮 ===== */
+/* ----- 通用按钮 ----- */
 .admin-btn {
     padding: 8px 18px;
     border: none;
@@ -91,6 +79,18 @@
 .admin-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(80, 130, 120, 0.15);
+}
+
+.admin-nav-tab {
+    background: rgba(255, 255, 255, 0.72);
+    color: #4e6658;
+    border: 1px solid rgba(120, 170, 155, 0.18);
+}
+
+.admin-nav-tab.is-active {
+    background: linear-gradient(135deg, rgba(255, 248, 214, 0.98), rgba(243, 227, 162, 0.92));
+    color: #705d13;
+    border-color: rgba(224, 199, 106, 0.45);
 }
 
 .admin-btn-save {
@@ -118,7 +118,7 @@
     background: #e6d4d4;
 }
 
-/* ===== 主内容区 ===== */
+/* ----- 主内容区 ----- */
 .admin-main {
     background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(6px);
@@ -135,7 +135,7 @@
     margin-bottom: 24px;
 }
 
-/* ===== 面板切换 ===== */
+/* ----- 面板切换 ----- */
 .admin-panel {
     display: none;
 }
@@ -144,91 +144,33 @@
     display: block;
 }
 
-/* ===== 树状列表（覆盖通用样式，适配管理页） ===== */
-.admin-tree {
-    margin-top: 8px;
-    min-height: 200px;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 12px;
-    border: 1px solid rgba(120, 170, 155, 0.15);
-    padding: 8px 0;
-}
-
-.admin-tree .tree-item {
+/* ----- 控制组 ----- */
+.admin-controls {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: default;
-}
-
-.admin-tree .tree-clickable {
-    cursor: pointer;
-}
-
-.admin-tree .tree-clickable:hover {
-    background: rgba(255, 248, 214, 0.65);
-}
-
-.admin-tree .tree-item .file-name {
-    flex: 1;
-}
-
-.admin-tree .perm-checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.85rem;
-    color: #5a7a6a;
-    cursor: pointer;
-    margin-left: 8px;
-}
-
-.admin-tree .perm-checkbox-label input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #7BC8C4;
-    cursor: pointer;
-}
-
-.admin-tree .tree-children {
-    border-left: 2px dashed rgba(120, 170, 155, 0.25);
-    margin-left: 20px;
-    padding-left: 0;
-}
-
-/* ===== 树占位提示 ===== */
-.tree-placeholder {
-    color: #adb5bd;
-    text-align: center;
-    padding: 40px 20px;
-    font-size: 15px;
-}
-
-/* ===== 底部提示 ===== */
-.admin-tip {
-    margin-top: 28px;
-    padding: 14px 20px;
-    background: rgba(255, 248, 214, 0.62);
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 16px;
-    border: 1px solid rgba(224, 199, 106, 0.18);
-    color: #3d5a4a;
-    font-size: 0.95rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.control-group {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 150px;
 }
 
-.admin-tip i {
-    color: #d0a93d;
-    font-size: 1.2rem;
+.control-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4c6b5b;
 }
 
-/* ============================================================
-   新增：科目按钮组（替换下拉框）
-   ============================================================ */
-
+/* ----- 科目按钮组 ----- */
 .subject-btn-group {
     display: flex;
     flex-wrap: wrap;
@@ -262,52 +204,87 @@
     box-shadow: 0 2px 10px rgba(217, 186, 75, 0.25);
 }
 
-/* ============================================================
-   新增：控制组布局（替代旧 .admin-subject-selector）
-   ============================================================ */
+/* ----- 树状列表（管理页专用） ----- */
+.admin-tree {
+    margin-top: 8px;
+    min-height: 200px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 12px;
+    border: 1px solid rgba(120, 170, 155, 0.15);
+    padding: 8px 0;
+}
 
-.admin-controls {
+.admin-tree .tree-item {
     display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    margin-bottom: 20px;
-    padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex: 1;
-    min-width: 150px;
-}
-
-.control-group label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #4c6b5b;
-}
-
-.control-group select {
-    padding: 8px 14px;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
     border-radius: 8px;
-    border: 1px solid rgba(120, 170, 155, 0.25);
-    background: rgba(255, 255, 255, 0.9);
-    font-size: 0.95rem;
+    cursor: default;
+}
+
+.admin-tree .tree-clickable {
     cursor: pointer;
-    outline: none;
-    transition: border-color 0.2s;
 }
 
-.control-group select:focus {
-    border-color: #7BC8C4;
-    box-shadow: 0 0 0 3px rgba(123, 200, 196, 0.15);
+.admin-tree .tree-clickable:hover {
+    background: rgba(255, 248, 214, 0.65);
 }
 
-/* ===== 隐藏旧的下拉框容器（兼容） ===== */
+.admin-tree .tree-item .file-name {
+    flex: 1;
+}
+
+.admin-tree .tree-children {
+    border-left: 2px dashed rgba(120, 170, 155, 0.25);
+    margin-left: 20px;
+    padding-left: 0;
+}
+
+.admin-tree .perm-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    color: #5a7a6a;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.admin-tree .perm-checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #7BC8C4;
+    cursor: pointer;
+}
+
+.tree-placeholder {
+    color: #adb5bd;
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 15px;
+}
+
+/* ----- 底部提示 ----- */
+.admin-tip {
+    margin-top: 28px;
+    padding: 14px 20px;
+    background: rgba(255, 248, 214, 0.62);
+    border-radius: 16px;
+    border: 1px solid rgba(224, 199, 106, 0.18);
+    color: #3d5a4a;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-tip i {
+    color: #d0a93d;
+    font-size: 1.2rem;
+}
+
+/* ----- 隐藏旧结构 ----- */
 .admin-subject-selector {
     display: none;
 }

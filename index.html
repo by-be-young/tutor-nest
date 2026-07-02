@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>学习笔记</title>
+    <title>学习资料仓库</title>
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 </head>
@@ -34,10 +34,13 @@
 
             <!-- 科目卡片（登录后显示） -->
             <div id="subject-cards-wrapper" class="subject-cards-wrapper">
-                <!-- 退出登录按钮（放在科目卡片上方） -->
-                <button id="logout-btn" class="logout-btn-primary">
-                    <i class="fas fa-sign-out-alt"></i> 退出登录
-                </button>
+                <!-- 用户信息和退出登录 -->
+                <div class="user-info-bar">
+                    <span id="user-display-name" class="user-name">👤 未登录</span>
+                    <button id="logout-btn" class="logout-btn-primary">
+                        <i class="fas fa-sign-out-alt"></i> 退出登录
+                    </button>
+                </div>
                 <!-- 滚动容器 -->
                 <div class="subject-cards-scroll" id="subject-cards-scroll">
                     <div class="subject-cards" id="subject-cards-container">
