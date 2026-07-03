@@ -28,6 +28,46 @@ const detailState = {
     contentVersion: 0
 };
 
+// ---------- Toast 弹窗 ----------
+let toastTimer = null;
+
+/**
+ * 显示自动关闭的弹窗
+ * @param {string} message - 提示内容
+ * @param {string} type - 类型：'success' | 'error' | 'info'
+ * @param {number} duration - 显示时长（毫秒）
+ */
+function showToast(message, type = 'info', duration = 3000) {
+    // 移除已有弹窗
+    const existing = document.querySelector('.custom-toast');
+    if (existing) {
+        existing.remove();
+        if (toastTimer) {
+            clearTimeout(toastTimer);
+            toastTimer = null;
+        }
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `custom-toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // 触发显示动画
+    requestAnimationFrame(() => {
+        toast.classList.add('toast-visible');
+    });
+
+    // 自动关闭
+    toastTimer = setTimeout(() => {
+        toast.classList.remove('toast-visible');
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+            toastTimer = null;
+        }, 300);
+    }, duration);
+}
+
 // ---------- 工具函数 ----------
 function getQueryParam(name) {
     return new URL(window.location.href).searchParams.get(name);
@@ -566,7 +606,10 @@ function renderAnswerSlot(questionId, index) {
 // ---------- 数据持久化 ----------
 async function persistStudyAnswers({ silent = false, targetQuestionId = null } = {}) {
     if (!detailState.blogId || !detailState.studentId) {
-        if (!silent) setActionStatus('当前文章没有可用的学生身份，无法提交', 'error');
+        if (!silent) {
+            setActionStatus('当前文章没有可用的学生身份，无法提交', 'error');
+            showToast('当前文章没有可用的学生身份，无法提交', 'error');
+        }
         return false;
     }
     const rows = [];
@@ -605,7 +648,10 @@ async function persistStudyAnswers({ silent = false, targetQuestionId = null } =
     });
 
     if (!rows.length) {
-        if (!silent) setActionStatus('没有需要提交的内容', 'info');
+        if (!silent) {
+            setActionStatus('没有需要提交的内容', 'info');
+            showToast('没有需要提交的内容', 'info');
+        }
         return true;
     }
 
@@ -615,15 +661,27 @@ async function persistStudyAnswers({ silent = false, targetQuestionId = null } =
 
     if (error) {
         console.error('保存学生答案失败:', error);
-        if (!silent) setActionStatus('提交失败，请稍后重试', 'error');
+        if (!silent) {
+            setActionStatus('提交失败，请稍后重试', 'error');
+            showToast('提交失败，请稍后重试', 'error');
+        }
         return false;
     }
-    if (!silent) setActionStatus('已提交，状态已更新', 'success');
+    if (!silent) {
+        setActionStatus('已提交，状态已更新', 'success');
+        showToast('提交成功！', 'success');
+    }
     return true;
 }
 
 async function persistAnswerKeys({ silent = false } = {}) {
-    if (!detailState.blogId) return false;
+    if (!detailState.blogId) {
+        if (!silent) {
+            setActionStatus('当前文章无效，无法保存', 'error');
+            showToast('当前文章无效，无法保存', 'error');
+        }
+        return false;
+    }
     const rows = [];
     detailState.slotNodes.forEach((node, questionId) => {
         const answerText = node.textarea?.value || '';
@@ -631,7 +689,10 @@ async function persistAnswerKeys({ silent = false } = {}) {
         rows.push({ blog_id: detailState.blogId, question_id: questionId, answer_text: answerText, auto_grade: autoGrade });
     });
     if (!rows.length) {
-        if (!silent) setActionStatus('没有可保存的答案设置', 'info');
+        if (!silent) {
+            setActionStatus('没有可保存的答案设置', 'info');
+            showToast('没有可保存的答案设置', 'info');
+        }
         return true;
     }
     const { error } = await supabase
@@ -639,16 +700,23 @@ async function persistAnswerKeys({ silent = false } = {}) {
         .upsert(rows, { onConflict: 'blog_id,question_id' });
     if (error) {
         console.error('保存答案设置失败:', error);
-        if (!silent) setActionStatus('保存失败，请稍后重试', 'error');
+        if (!silent) {
+            setActionStatus('保存失败，请稍后重试', 'error');
+            showToast('保存失败，请稍后重试', 'error');
+        }
         return false;
     }
-    if (!silent) setActionStatus('答案已保存', 'success');
+    if (!silent) {
+        setActionStatus('答案已保存', 'success');
+        showToast('保存成功！', 'success');
+    }
     return true;
 }
 
 async function persistReviewResult(questionId, reviewResult) {
     if (!detailState.blogId || !detailState.studentId) {
         setActionStatus('请先从管理员页面选择学生后再批阅', 'error');
+        showToast('请先从管理员页面选择学生后再批阅', 'error');
         return false;
     }
     const submission = detailState.submissionMap.get(questionId) || {};
@@ -669,6 +737,7 @@ async function persistReviewResult(questionId, reviewResult) {
     if (error) {
         console.error('保存批阅结果失败:', error);
         setActionStatus('批阅保存失败，请重试', 'error');
+        showToast('批阅保存失败，请重试', 'error');
         return false;
     }
 
@@ -686,6 +755,7 @@ async function persistReviewResult(questionId, reviewResult) {
         status.className = `question-pill ${cls}`;
     }
     setActionStatus('批阅已保存', 'success');
+    showToast('批阅已保存', 'success');
     return true;
 }
 
@@ -800,7 +870,9 @@ async function initDetail() {
                 const ok = await persistStudyAnswers({ silent: false });
                 if (topBtn) topBtn.disabled = false;
                 if (fab) fab.disabled = false;
-                if (ok) await initDetail();
+                if (ok) {
+                    await initDetail();
+                }
             };
 
             const submitBtn = document.createElement('button');
@@ -827,7 +899,9 @@ async function initDetail() {
                 const ok = await persistAnswerKeys({ silent: false });
                 if (topBtn) topBtn.disabled = false;
                 if (fab) fab.disabled = false;
-                if (ok) await initDetail();
+                if (ok) {
+                    await initDetail();
+                }
             };
 
             const saveBtn = document.createElement('button');
