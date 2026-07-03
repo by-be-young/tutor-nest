@@ -702,7 +702,12 @@ function getDetailHeaderActions() {
     return actions;
 }
 
+let isRendering = false;
+
 async function initDetail() {
+    if (isRendering) return;
+    isRendering = true;
+
     resetDetailState();
     const mode = getDetailMode();
     detailState.mode = mode;
