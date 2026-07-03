@@ -1,0 +1,10 @@
+{
+    "name": "simple-blog",
+    "version": "1.0.0",
+    "description": "极简博客，脚本自动生成数据",
+    "scripts": {
+        "generate": "node scripts/generate.js"
+    },
+    "author": "",
+    "license": "MIT"
+}

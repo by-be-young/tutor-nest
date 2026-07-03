@@ -1,0 +1,541 @@
+/* Obsidian Markdown 美化样式 - 修正版 */
+
+/* ========== 全局基础样式 ========== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* ========== 预览模式样式 ========== */
+.markdown-preview-view {
+    line-height: 1.8;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 32px;
+    background: #f4f8fb;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 标题美化 */
+.markdown-preview-view h1 {
+    color: #2d8cf0;
+    font-size: 2.3rem;
+    font-weight: 800;
+    margin: 1.4em 0 0.8em 0;
+    border-left: 6px solid #2d8cf0;
+    padding: 10px 14px;
+    background: linear-gradient(90deg, rgba(234, 246, 255, 0.95) 0%, rgba(234, 246, 255, 0.6) 60%);
+    border-radius: 8px;
+}
+
+.markdown-preview-view h2 {
+    color: #19be6b;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 1.2em 0 0.75em 0;
+    border-left: 5px solid #19be6b;
+    padding: 9px 12px;
+    background: linear-gradient(90deg, rgba(234, 255, 243, 0.95) 0%, rgba(234, 255, 243, 0.6) 60%);
+    border-radius: 6px;
+}
+
+.markdown-preview-view h3 {
+    color: #ff9900;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 1.2em 0 0.8em 0;
+    border-left: 4px solid #ff9900;
+    padding: 8px 12px;
+    background: linear-gradient(90deg, rgba(255, 251, 230, 0.9) 0%, rgba(255, 251, 230, 0.6) 60%);
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.markdown-preview-view h4 {
+    color: #9b0b74;
+    font-size: 1.08rem;
+    font-weight: 700;
+    margin: 1em 0 0.8em 0;
+    background: #f3d7ff;
+    border: 2px solid #9b0b74;
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+/* 段落美化 */
+.markdown-preview-view p {
+    color: #444;
+    font-size: 1.13rem;
+    margin: 1em 0;
+    line-height: 1.85;
+    font-family: 'KaiTi', '楷体', STKaiti, serif;
+}
+
+/* 列表美化 */
+.markdown-preview-view ul,
+.markdown-preview-view ol {
+    margin: 1em 0;
+    padding-left: 2em;
+}
+
+.markdown-preview-view ul li {
+    list-style: disc inside;
+    margin-bottom: 0.3em;
+    color: #444;
+}
+
+.markdown-preview-view ol li {
+    list-style: decimal inside;
+    margin-bottom: 0.3em;
+    color: #444;
+}
+
+/* 引用块美化 - 根据原博客样式重新设计 */
+.markdown-preview-view blockquote {
+    position: relative;
+    border: none;
+    background: linear-gradient(90deg,
+            rgba(255, 225, 120, 0.22) 0%,
+            rgba(255, 249, 220, 0.80) 50%,
+            rgba(255, 225, 120, 0.22) 100%);
+    color: #333;
+    padding: 14px 18px;
+    margin: 1.2em 0;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    line-height: 1.9;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03) inset;
+    overflow: visible;
+}
+
+/* 顶部与底部细条 */
+.markdown-preview-view blockquote:before,
+.markdown-preview-view blockquote:after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 210, 120, 0.95);
+    opacity: 0.95;
+}
+
+.markdown-preview-view blockquote:before {
+    top: 8px;
+}
+
+.markdown-preview-view blockquote:after {
+    bottom: 8px;
+}
+
+.markdown-preview-view blockquote p {
+    margin: 0;
+}
+
+/* 图片美化 */
+.markdown-preview-view img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 18px auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.12);
+    border: 10px solid transparent;
+    background: repeating-linear-gradient(45deg,
+            #d6b18a 0px,
+            #d6b18a 10px,
+            #c79a6b 10px,
+            #c79a6b 20px,
+            #b98355 20px,
+            #b98355 28px) border-box;
+}
+
+/* 代码块美化 */
+.markdown-preview-view pre {
+    background: rgba(167, 243, 208, 0.22);
+    color: inherit;
+    border: 1px solid rgba(24, 49, 58, 0.06);
+    border-radius: 10px;
+    padding: 18px 16px;
+    margin: 18px 0;
+    overflow-x: auto;
+    font-size: 1.02rem;
+    box-shadow: 0 10px 22px rgba(44, 62, 80, 0.04);
+}
+
+.markdown-preview-view code {
+    font-size: 1.02rem;
+    border-radius: 6px;
+    background: rgba(245, 247, 250, 0.9);
+    color: #18313a;
+    border: 1px solid rgba(24, 49, 58, 0.06);
+    padding: 2px 6px;
+    font-family: 'Comic Mono', 'Comic Sans MS', 'Comic Neue', ui-monospace, monospace;
+}
+
+.markdown-preview-view pre code {
+    background: transparent;
+    color: inherit;
+    border: none;
+    padding: 0;
+}
+
+/* 表格美化 */
+.markdown-preview-view table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.markdown-preview-view th,
+.markdown-preview-view td {
+    border: none;
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+    white-space: normal;
+    word-break: break-word;
+    color: #222;
+    font-size: 1.02rem;
+}
+
+.markdown-preview-view thead th {
+    background: rgba(255, 150, 120, 0.30);
+    color: #3a1f14;
+    font-weight: 700;
+}
+
+/* 表格圆角 */
+.markdown-preview-view thead th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.markdown-preview-view thead th:last-child {
+    border-top-right-radius: 12px;
+}
+
+.markdown-preview-view tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 12px;
+}
+
+.markdown-preview-view tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 12px;
+}
+
+.markdown-preview-view tbody tr:nth-child(odd) {
+    background: rgba(200, 170, 255, 0.18);
+}
+
+.markdown-preview-view tbody tr:nth-child(even) {
+    background: rgba(170, 135, 255, 0.24);
+}
+
+/* 链接美化 */
+.markdown-preview-view a {
+    color: #2d8cf0;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.markdown-preview-view a:hover {
+    text-decoration: underline;
+    color: #b620e0;
+}
+
+/* ========== 编辑模式样式 ========== */
+.cm-s-obsidian {
+
+    /* 标题样式 */
+    .cm-header-1 {
+        color: #2d8cf0;
+        font-weight: 800;
+    }
+
+    .cm-header-2 {
+        color: #19be6b;
+        font-weight: 700;
+    }
+
+    .cm-header-3 {
+        color: #ff9900;
+        font-weight: 700;
+    }
+
+    /* h4样式 - 只改变颜色，不要背景和边框 */
+    .cm-header-4 {
+        color: #9b0b74;
+        font-weight: 700;
+    }
+
+    /* 行内代码 */
+    .cm-inline-code {
+        background: rgba(245, 247, 250, 0.9);
+        color: #18313a;
+        border-radius: 4px;
+        padding: 2px 4px;
+        border: 1px solid rgba(24, 49, 58, 0.06);
+        font-family: 'Comic Mono', monospace;
+    }
+
+    /* 链接 */
+    .cm-link {
+        color: #2d8cf0;
+    }
+
+    /* 粗体 */
+    .cm-strong {
+        color: #d08770;
+    }
+
+    /* 斜体 */
+    .cm-em {
+        color: #a3be8c;
+    }
+
+    /* 列表 */
+    .cm-formatting-list {
+        color: #a3be8c;
+    }
+}
+
+/* ========== 增强样式 ========== */
+/* 任务列表 */
+.markdown-preview-view .task-list-item-checkbox {
+    border-radius: 50%;
+    border: 2px solid #2d8cf0;
+}
+
+.markdown-preview-view .task-list-item-checkbox:checked {
+    background-color: #2d8cf0;
+    border-color: #2d8cf0;
+}
+
+/* 水平线 */
+.markdown-preview-view hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(90deg, #2d8cf0, #19be6b, #ff9900);
+    margin: 2em 0;
+    border-radius: 1px;
+}
+
+/* 内联数学公式 */
+.markdown-preview-view .math.math-inline {
+    background: rgba(234, 246, 255, 0.6);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #2d8cf0;
+}
+
+/* 块级数学公式 */
+.markdown-preview-view .math.math-block {
+    background: rgba(245, 247, 250, 0.9);
+    padding: 1em;
+    border-radius: 8px;
+    border-left: 4px solid #9b0b74;
+}
+
+/* 脚注 */
+.markdown-preview-view .footnote-ref,
+.markdown-preview-view .footnote-backref {
+    color: #2d8cf0;
+    font-weight: bold;
+}
+
+.markdown-preview-view .footnotes {
+    border-top: 1px solid #eee;
+    margin-top: 2em;
+    padding-top: 1em;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* ========== 响应式设计 ========== */
+@media (max-width: 768px) {
+    .markdown-preview-view {
+        padding: 15px;
+        margin: 10px;
+        border-radius: 12px;
+    }
+
+    .markdown-preview-view h1 {
+        font-size: 1.8rem;
+    }
+
+    .markdown-preview-view h2 {
+        font-size: 1.5rem;
+    }
+
+    .markdown-preview-view h3 {
+        font-size: 1.3rem;
+    }
+
+    .markdown-preview-view p {
+        font-size: 1rem;
+    }
+}
+
+/* ========== 暗色模式支持 ========== */
+.theme-dark .markdown-preview-view {
+    background: #2e3440;
+    color: #e5e9f0;
+}
+
+.theme-dark .markdown-preview-view p {
+    color: #d8dee9;
+}
+
+.theme-dark .markdown-preview-view h1 {
+    color: #81a1c1;
+    background: linear-gradient(90deg, rgba(46, 52, 64, 0.95) 0%, rgba(67, 76, 94, 0.6) 60%);
+}
+
+.theme-dark .markdown-preview-view h2 {
+    color: #a3be8c;
+    background: linear-gradient(90deg, rgba(46, 52, 64, 0.95) 0%, rgba(67, 76, 94, 0.6) 60%);
+}
+
+.theme-dark .markdown-preview-view h3 {
+    color: #ebcb8b;
+    background: linear-gradient(90deg, rgba(46, 52, 64, 0.95) 0%, rgba(67, 76, 94, 0.6) 60%);
+}
+
+.theme-dark .markdown-preview-view h4 {
+    color: #b48ead;
+    background: rgba(180, 142, 173, 0.2);
+    border: 2px solid #b48ead;
+}
+
+.theme-dark .markdown-preview-view blockquote {
+    background: linear-gradient(90deg,
+            rgba(180, 142, 173, 0.15) 0%,
+            rgba(94, 129, 172, 0.25) 50%,
+            rgba(180, 142, 173, 0.15) 100%);
+    color: #d8dee9;
+}
+
+.theme-dark .markdown-preview-view blockquote:before,
+.theme-dark .markdown-preview-view blockquote:after {
+    background: rgba(180, 142, 173, 0.8);
+}
+
+.theme-dark .markdown-preview-view pre {
+    background: #434c5e;
+}
+
+.theme-dark .markdown-preview-view code {
+    background: #3b4252;
+    color: #e5e9f0;
+}
+
+.theme-dark .markdown-preview-view table {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark .markdown-preview-view th {
+    background: rgba(129, 161, 193, 0.3);
+    color: #e5e9f0;
+}
+
+.theme-dark .markdown-preview-view tbody tr:nth-child(odd) {
+    background: rgba(129, 161, 193, 0.1);
+}
+
+.theme-dark .markdown-preview-view tbody tr:nth-child(even) {
+    background: rgba(163, 190, 140, 0.1);
+}
+
+.theme-dark .markdown-preview-view a {
+    color: #81a1c1;
+}
+
+.theme-dark .markdown-preview-view a:hover {
+    color: #b48ead;
+}
+
+/* 暗色模式编辑模式 */
+.theme-dark .cm-s-obsidian .cm-header-4 {
+    color: #b48ead;
+    /* 编辑模式下只改变颜色，不要背景和边框 */
+}
+
+/* ========== 特殊效果 ========== */
+/* 代码块复制按钮样式（如果使用代码块增强插件） */
+.markdown-preview-view .copy-code-button {
+    background: linear-gradient(135deg, rgba(0, 172, 255, 1), rgba(72, 219, 187, 0.98), rgba(255, 110, 155, 0.98));
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.markdown-preview-view .copy-code-button:hover {
+    transform: translateY(-1px);
+}
+
+/* 高亮文本 */
+.markdown-preview-view mark {
+    background: linear-gradient(120deg, rgba(255, 251, 230, 0.8) 0%, rgba(255, 251, 230, 0.4) 100%);
+    color: #333;
+    padding: 0 2px;
+    border-radius: 3px;
+}
+
+/* 键盘按键样式 */
+.markdown-preview-view kbd {
+    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #adb5bd;
+    border-radius: 4px;
+    box-shadow: 0 2px 0 #adb5bd;
+    color: #495057;
+    font-size: 0.9em;
+    padding: 2px 6px;
+    font-family: 'Comic Mono', monospace;
+}
+
+/* ========== 马卡龙风格编辑模式 ========== */
+
+.cm-s-obsidian {
+    /* 马卡龙渐变背景 */
+    background: linear-gradient(135deg,
+            rgba(255, 248, 248, 0.95) 0%,
+            rgba(248, 255, 248, 0.95) 50%,
+            rgba(248, 248, 255, 0.95) 100%);
+}
+
+/* 当前行 */
+.cm-s-obsidian .cm-activeLine {
+    background: linear-gradient(90deg,
+            rgba(255, 182, 201, 0.15) 0%,
+            rgba(167, 243, 208, 0.12) 100%);
+}
+
+/* 代码块 */
+.cm-s-obsidian .cm-line.HyperMD-codeblock {
+    background: linear-gradient(90deg,
+            rgba(167, 243, 208, 0.18) 0%,
+            rgba(154, 215, 255, 0.12) 100%);
+    border-left: 4px solid rgba(167, 243, 208, 0.4);
+    padding-left: 8px;
+    margin: 2px 0;
+}
+
+/* 引用块 */
+.cm-s-obsidian .cm-line.HyperMD-quote {
+    background: linear-gradient(90deg,
+            rgba(255, 225, 120, 0.12) 0%,
+            rgba(255, 249, 220, 0.25) 100%);
+    border-left: 4px solid rgba(255, 210, 120, 0.6);
+    padding-left: 10px;
+    margin: 2px 0;
+}
