@@ -11,14 +11,36 @@
 </head>
 
 <body>
+
+    <!-- 导航栏（包含学科标题、篇数、学科切换按钮） -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <!-- 左侧：返回首页 + Logo -->
+            <a href="index.html" class="nav-logo">
+                <i class="fas fa-arrow-left"></i> 学习资料仓库
+            </a>
+
+            <!-- 中间：当前学科标题 + 篇数 -->
+            <div class="nav-center">
+                <span class="nav-current-subject" id="nav-current-subject">科目</span>
+                <span class="nav-post-count" id="nav-post-count">0 篇</span>
+            </div>
+
+            <!-- 右侧：学科切换按钮 + 用户状态 -->
+            <div class="nav-right">
+                <div class="nav-subject-switcher" id="nav-subject-switcher"></div>
+                <span id="nav-user-status" class="nav-user-status">未登录</span>
+                <button id="nav-login-btn" class="nav-btn nav-btn-login">登录</button>
+                <button id="nav-logout-btn" class="nav-btn nav-btn-logout" style="display:none;">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 分类主体（只保留列表，header 已移除） -->
     <div class="category-container">
-        <header class="category-header">
-            <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> 返回首页</a>
-            <div class="subject-title">科目 <span class="subject-badge">📂</span></div>
-            <span class="post-count">0 篇</span>
-        </header>
-        <div class="blog-list"></div>
+        <div class="blog-list" id="blog-list"></div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>

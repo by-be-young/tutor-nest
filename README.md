@@ -1,3 +1,4 @@
+
 # 📚 家教资料系统
 
 一个基于 **Supabase** 的轻量级家教资料管理平台，专为家教场景设计，支持学生登录、资料权限控制、树状目录展示、管理员后台管理等功能。
@@ -40,6 +41,73 @@
 
 ---
 
+## 🗄️ 数据库表结构
+
+系统使用 Supabase PostgreSQL 数据库，包含以下核心表：
+
+### 1. `student` — 学生表
+
+存储学生账户信息。
+
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| `id` | `int8` (PK) | 学生 ID，自增主键 |
+| `username` | `text` | 学生姓名（登录凭证） |
+| `permissions` | `int4[]` | 对哪些文章有权限 |
+
+**RLS 策略**：
+- `SELECT`：允许所有用户读取（用于登录验证和权限展示）
+- `INSERT` / `UPDATE` / `DELETE`：仅管理员可操作
+
+---
+
+### 2. `article_answer_keys` — 答案设置表
+
+存储每篇文章每道题目的标准答案和批阅配置。
+
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| `id` | `int8` (PK) | 自增主键 |
+| `blog_id` | `int8` | 关联文章 ID |
+| `question_id` | `text` | 题目编号（如 "1"、"2"，由 `@` 标记生成） |
+| `answer_text` | `text` | 标准答案文本 |
+| `auto_grade` | `boolean` | 是否启用自动批阅（默认 `false`） |
+| `created_at` | `timestamp` | 创建时间 |
+| `updated_at` | `timestamp` | 更新时间 |
+
+**唯一约束**：`(blog_id, question_id)` 联合唯一。
+
+**RLS 策略**：
+- `SELECT` / `INSERT` / `UPDATE`：仅教师（管理员）可操作
+- `DELETE`：仅管理员可操作
+
+---
+
+### 3. `article_question_submissions` — 提交记录表
+
+存储学生提交的答案及批阅状态。
+
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| `id` | `bigint` (PK) | 自增主键 |
+| `blog_id` | `bigint` | 关联文章 ID |
+| `student_id` | `bigint` (FK) | 关联 `student.id` |
+| `question_id` | `text` | 题目编号 |
+| `answer_text` | `text` | 学生提交的答案 |
+| `review_status` | `text` | 批阅状态：`'pending'`（待批阅）、`'reviewed'`（已批阅） |
+| `review_result` | `text` | 批阅结果：`'correct'`（正确）、`'partial'`（半对）、`'wrong'`（错误）、`null`（未批阅） |
+| `submitted_at` | `timestamp` | 提交时间 |
+| `reviewed_at` | `timestamp` | 批阅时间（自动批阅时与提交时间一致） |
+
+**唯一约束**：`(blog_id, student_id, question_id)` 联合唯一。
+
+**RLS 策略**：
+- `SELECT` / `INSERT` / `UPDATE`：学生可操作自己的提交记录；教师可操作所有记录
+- `DELETE`：仅管理员可操作（通常不删除）
+
+
+---
+
 ## 📁 项目结构
 
 ```
@@ -56,12 +124,14 @@
 │   └── blogs.json              # 脚本生成的资料索引
 ├── css/
 │   ├── style.css               # 全局样式
+│   ├── category-and-detail.css # 分类页 & 详情页样式
 │   └── admin.css               # 管理员页面样式
 ├── js/
 │   ├── supabase-client.js      # Supabase 客户端初始化
 │   ├── auth.js                 # 登录/退出/权限检查
 │   ├── admin.js                # 管理员页面逻辑
 │   ├── main.js                 # 分类页/详情页渲染
+│   ├── home.js                 # 首页逻辑
 │   └── katex-loader.js         # KaTeX 自动加载与渲染
 ├── scripts/
 │   └── generate.js             # 扫描 blogs/ 生成 blogs.json
@@ -99,6 +169,25 @@
 2. 文件名即为资料标题（无需 Front Matter）。
 3. 运行 `npm run generate` 更新索引。
 4. 在管理员页面为学生授权。
+
+### 题目标记规范
+
+在 Markdown 中，使用 `【@编号】` 或 `[@编号]` 标记题目位置，系统会自动替换为交互式答题卡片。
+
+| 标记格式 | 说明 |
+|----------|------|
+| `【@1】` | 固定编号为 1 的题目 |
+| `【@】` | 自动分配编号（从 1 开始递增） |
+| `[@2]` | 固定编号为 2 的题目（方括号形式） |
+
+**示例**：
+```markdown
+## 练习题
+
+1. 请计算 $1 + 1$ 等于多少？【@1】
+
+2. 请写出勾股定理的公式。【@2】
+```
 
 ### 资料内嵌公式示例
 ```markdown
@@ -315,7 +404,7 @@ async function loadQuestionSubmissions(blogId, studentId) {
 ### 5.3 复杂逻辑注释
 
 - 在复杂条件、算法、正则表达式前添加注释说明意图。
-- 不要注释显而易见的代码（如 `i++`），注释应解释“为什么”而不是“是什么”。
+- 不要注释显而易见的代码（如 `i++`），注释应解释"为什么"而不是"是什么"。
 
 ---
 
