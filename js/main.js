@@ -934,8 +934,9 @@ let isRendering = false;
 async function initDetail() {
     if (isRendering) return;
     isRendering = true;
-    resetDetailState();
-    const mode = getDetailMode();
+    try {
+        resetDetailState();
+        const mode = getDetailMode();
     detailState.mode = mode;
 
     const fab = document.getElementById('fab-submit');
@@ -1117,7 +1118,11 @@ async function initDetail() {
         window.addEventListener('pagehide', autoSave, { once: true });
     }
 
-    isRendering = false;
+    } catch (e) {
+        console.error('initDetail 出错:', e);
+    } finally {
+        isRendering = false;
+    }
 }
 
 // ---------- 导航栏更新（详情页） ----------
@@ -1148,11 +1153,18 @@ document.addEventListener('DOMContentLoaded', function () {
     else if (path.includes('detail.html')) initDetail();
 });
 
-let resizeTimer;
-window.addEventListener('resize', function () {
+// 使用 matchMedia 监听 1024px 断点变化，而非监听 resize
+// 避免打开 F12 工具等视口微调触发全量重渲染导致卡死
+const breakpointMql = window.matchMedia('(min-width: 1024px)');
+let lastIsDesktop = breakpointMql.matches;
+breakpointMql.addEventListener('change', function (e) {
     if (window.location.pathname.includes('detail.html')) {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(initDetail, 300);
+        const nowDesktop = e.matches;
+        // 只在真正跨越断点时重渲染，避免 F12 开合等操作触发
+        if (nowDesktop !== lastIsDesktop) {
+            lastIsDesktop = nowDesktop;
+            initDetail();
+        }
     }
 });
 

@@ -1,31 +1,49 @@
 /* ============================================================
-   admin.css - 管理员页面样式
+   admin.css - 管理员页面样式（导航栏 + 侧边栏布局）
    ============================================================ */
 
-.admin-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px 30px 60px;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(145deg, #f0f7f5 0%, #e4f0ed 50%, #dcebe8 100%);
+    font-family: "Times New Roman", "楷体", "KaiTi", serif;
+    color: #3d5a4a;
     min-height: 100vh;
 }
 
-/* ----- 导航栏 ----- */
-.admin-nav {
+/* ----- 应用容器 ----- */
+.admin-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 1440px;
+    min-width: 1220px;
+    margin: 0 auto;
+    padding: 16px 20px 20px;
+}
+
+/* ----- 顶部导航栏 ----- */
+.admin-header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    padding: 14px 24px;
+    padding: 12px 24px;
     background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
     border-radius: 20px;
     border: 1px solid rgba(120, 170, 155, 0.15);
-    box-shadow: 0 4px 20px rgba(80, 130, 120, 0.08);
-    margin-bottom: 32px;
+    box-shadow: 0 4px 20px rgba(80, 130, 120, 0.06);
+    margin-bottom: 20px;
+    flex-shrink: 0;
 }
 
-.admin-nav-left {
+.admin-header-left {
     display: flex;
     align-items: center;
     gap: 18px;
@@ -36,6 +54,9 @@
     font-weight: 700;
     font-size: 1.2rem;
     color: #2d4a3a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .admin-current-student {
@@ -44,22 +65,29 @@
     border-radius: 30px;
     font-weight: 500;
     color: #2d4a3a;
+    font-size: 0.95rem;
 }
 
-.admin-nav-right {
+.admin-header-right {
     display: flex;
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
 }
 
-.admin-nav-right select {
+.admin-header-right select {
     padding: 8px 16px;
     border-radius: 30px;
     border: 1px solid rgba(120, 170, 155, 0.25);
     background: #f8fbfa;
     font-size: 0.95rem;
     cursor: pointer;
+    outline: none;
+}
+
+.admin-header-right select:focus {
+    border-color: #7BC8C4;
+    box-shadow: 0 0 0 3px rgba(123, 200, 196, 0.2);
 }
 
 /* ----- 通用按钮 ----- */
@@ -74,28 +102,29 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    background: rgba(255, 255, 255, 0.7);
+    color: #4e6658;
+    border: 1px solid rgba(120, 170, 155, 0.15);
 }
 
 .admin-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(80, 130, 120, 0.15);
+    box-shadow: 0 6px 16px rgba(80, 130, 120, 0.12);
 }
 
-.admin-nav-tab {
-    background: rgba(255, 255, 255, 0.72);
-    color: #4e6658;
-    border: 1px solid rgba(120, 170, 155, 0.18);
+.admin-btn-add {
+    background: rgba(91, 168, 164, 0.15);
+    color: var(--teal-dark);
 }
 
-.admin-nav-tab.is-active {
-    background: linear-gradient(135deg, rgba(255, 248, 214, 0.98), rgba(243, 227, 162, 0.92));
-    color: #705d13;
-    border-color: rgba(224, 199, 106, 0.45);
+.admin-btn-add:hover {
+    background: rgba(91, 168, 164, 0.25);
 }
 
 .admin-btn-save {
     background: #7BC8C4;
     color: white;
+    border-color: #7BC8C4;
 }
 
 .admin-btn-save:disabled {
@@ -107,41 +136,130 @@
 
 .admin-btn-save:not(:disabled):hover {
     background: #5BA8A4;
+    border-color: #5BA8A4;
 }
 
 .admin-btn-logout {
     background: #f0e6e6;
     color: #7a5a5a;
+    border-color: #f0e6e6;
 }
 
 .admin-btn-logout:hover {
     background: #e6d4d4;
 }
 
-/* ----- 主内容区 ----- */
-.admin-main {
+/* ----- 主体：侧边栏 + 内容 ----- */
+.admin-body {
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    min-height: 500px;
+}
+
+/* ----- 侧边栏 ----- */
+.admin-sidebar {
+    flex: 0 0 200px;
     background: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(6px);
-    border-radius: 24px;
-    padding: 32px 30px;
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 32px rgba(80, 130, 120, 0.06);
+    box-shadow: 0 4px 20px rgba(80, 130, 120, 0.04);
+    padding: 20px 0 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.admin-title {
-    font-size: 1.6rem;
-    font-weight: 600;
+.admin-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 12px;
+}
+
+.admin-sidebar-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 14px;
+    background: transparent;
+    color: #4e6658;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+
+.admin-sidebar-btn i {
+    width: 22px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.admin-sidebar-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
     color: #2d4a3a;
-    margin-bottom: 24px;
 }
 
-/* ----- 面板切换 ----- */
+.admin-sidebar-btn.is-active {
+    background: linear-gradient(135deg, rgba(255, 248, 214, 0.95), rgba(243, 227, 162, 0.85));
+    color: #705d13;
+    box-shadow: 0 2px 10px rgba(217, 186, 75, 0.15);
+}
+
+.admin-sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(120, 170, 155, 0.12);
+    font-size: 0.85rem;
+    color: var(--gray);
+    text-align: center;
+}
+
+/* ----- 主内容区 ----- */
+.admin-content {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    padding: 24px 28px 32px;
+    box-shadow: 0 4px 20px rgba(80, 130, 120, 0.04);
+    overflow-x: auto;
+}
+
+/* ----- 面板 ----- */
 .admin-panel {
     display: none;
 }
 
 .admin-panel.is-active {
     display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #2d4a3a;
+    margin-bottom: 20px;
 }
 
 /* ----- 控制组 ----- */
@@ -149,8 +267,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 24px;
-    margin-bottom: 20px;
-    padding: 16px 20px;
+    margin-bottom: 18px;
+    padding: 14px 18px;
     background: rgba(255, 255, 255, 0.5);
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.5);
@@ -201,16 +319,16 @@
     background: linear-gradient(135deg, rgba(255, 248, 214, 0.95), rgba(243, 227, 162, 0.85));
     border-color: #d9ba4b;
     color: #705d13;
-    box-shadow: 0 2px 10px rgba(217, 186, 75, 0.25);
+    box-shadow: 0 2px 10px rgba(217, 186, 75, 0.2);
 }
 
 /* ----- 树状列表（管理页专用） ----- */
 .admin-tree {
-    margin-top: 8px;
+    margin-top: 4px;
     min-height: 200px;
     background: rgba(255, 255, 255, 0.7);
     border-radius: 12px;
-    border: 1px solid rgba(120, 170, 155, 0.15);
+    border: 1px solid rgba(120, 170, 155, 0.12);
     padding: 8px 0;
 }
 
@@ -267,11 +385,11 @@
 
 /* ----- 底部提示 ----- */
 .admin-tip {
-    margin-top: 28px;
+    margin-top: 24px;
     padding: 14px 20px;
-    background: rgba(255, 248, 214, 0.62);
+    background: rgba(255, 248, 214, 0.55);
     border-radius: 16px;
-    border: 1px solid rgba(224, 199, 106, 0.18);
+    border: 1px solid rgba(224, 199, 106, 0.15);
     color: #3d5a4a;
     font-size: 0.95rem;
     display: flex;
@@ -284,33 +402,79 @@
     font-size: 1.2rem;
 }
 
-/* ----- 隐藏旧结构 ----- */
-.admin-subject-selector {
-    display: none;
-}
-
 /* ============================================================
    响应式
    ============================================================ */
 
-@media (max-width: 720px) {
-    .admin-nav {
+@media (max-width: 820px) {
+    .admin-body {
+        flex-direction: column;
+    }
+
+    .admin-sidebar {
+        flex: 0 0 auto;
+        flex-direction: row;
+        padding: 12px 16px;
+        align-items: center;
+    }
+
+    .admin-sidebar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 0;
+        gap: 4px;
+    }
+
+    .admin-sidebar-btn {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+        width: auto;
+        border-radius: 30px;
+    }
+
+    .admin-sidebar-footer {
+        display: none;
+    }
+
+    .admin-content {
+        padding: 18px 16px 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-app {
+        padding: 8px 10px 10px;
+    }
+
+    .admin-header {
         flex-direction: column;
         align-items: stretch;
+        padding: 12px 16px;
     }
 
-    .admin-nav-right {
-        justify-content: flex-start;
+    .admin-header-right {
         flex-wrap: wrap;
+        gap: 8px;
     }
 
-    .admin-main {
-        padding: 20px 16px;
+    .admin-header-right select {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .admin-btn {
+        font-size: 0.85rem;
+        padding: 6px 14px;
+    }
+
+    .admin-title {
+        font-size: 1.3rem;
     }
 
     .admin-controls {
         flex-direction: column;
-        gap: 16px;
+        gap: 12px;
+        padding: 12px 14px;
     }
 
     .control-group {
@@ -320,5 +484,32 @@
     .subject-btn {
         padding: 6px 14px;
         font-size: 0.8rem;
+    }
+
+    .admin-sidebar {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 10px;
+    }
+
+    .admin-sidebar-nav {
+        justify-content: center;
+    }
+
+    .admin-sidebar-btn {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+
+    .admin-tree .tree-item {
+        font-size: 0.9rem;
+        padding: 6px 10px;
+        flex-wrap: wrap;
+    }
+
+    .admin-tip {
+        font-size: 0.85rem;
+        padding: 10px 14px;
+        flex-wrap: wrap;
     }
 }

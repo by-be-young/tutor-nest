@@ -70,15 +70,7 @@
             return;
         }
         try {
-            const slots = [];
-            element.querySelectorAll('.question-slot').forEach(slot => {
-                const parent = slot.parentNode;
-                const nextSibling = slot.nextSibling;
-                const placeholder = document.createComment('slot-placeholder');
-                parent.replaceChild(placeholder, slot);
-                slots.push({ placeholder, slot, parent, nextSibling });
-            });
-
+            // 使用 ignoredClasses 跳过 question-slot，避免移除/重新插入导致 observer 循环触发
             window.renderMathInElement(element, {
                 delimiters: [
                     { left: '$$', right: '$$', display: true },
@@ -86,18 +78,8 @@
                     { left: '\\(', right: '\\)', display: false },
                     { left: '\\[', right: '\\]', display: true }
                 ],
-                throwOnError: false
-            });
-
-            slots.forEach(({ placeholder, slot, parent, nextSibling }) => {
-                if (nextSibling && nextSibling.parentNode === parent) {
-                    parent.insertBefore(slot, nextSibling);
-                } else {
-                    parent.appendChild(slot);
-                }
-                if (placeholder.parentNode) {
-                    placeholder.parentNode.removeChild(placeholder);
-                }
+                throwOnError: false,
+                ignoredClasses: ['question-slot']
             });
         } catch (e) {
             console.warn('KaTeX 渲染出错:', e);

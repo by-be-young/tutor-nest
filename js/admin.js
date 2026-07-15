@@ -22,38 +22,25 @@ let currentAnswerSubject = null;
 // ---------- DOM 引用 ----------
 const studentSelect = document.getElementById('admin-student-select');
 const studentNameDisplay = document.getElementById('admin-current-student');
-const studentNameTitle = document.getElementById('admin-student-name');
+const sidebarStudent = document.getElementById('admin-sidebar-student');
 const treeContainer = document.getElementById('admin-permission-tree');
 const saveBtn = document.getElementById('admin-save-btn');
 const addStudentBtn = document.getElementById('admin-add-student-btn');
 const logoutBtn = document.getElementById('admin-logout-btn');
-const navTabs = Array.from(document.querySelectorAll('.admin-nav-tab'));
+const sidebarBtns = Array.from(document.querySelectorAll('.admin-sidebar-btn'));
 
 const permissionPanel = document.getElementById('permission-panel');
 const reviewPanel = document.getElementById('review-panel');
 const answerPanel = document.getElementById('answer-panel');
 
-const reviewStudentSelect = document.getElementById('admin-review-student-select');
-const reviewStudentName = document.getElementById('admin-review-student-name');
 const reviewTreeContainer = document.getElementById('admin-review-tree');
-
-const answerSubjectName = document.getElementById('admin-answer-subject-name');
 const answerTreeContainer = document.getElementById('admin-answer-tree');
 
 // ---------- 工具函数 ----------
-function populateStudentSelectFor(selectEl, students, placeholder) {
-    if (!selectEl) return;
-    selectEl.innerHTML = `<option value="">${placeholder}</option>`;
-    students.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s.id;
-        opt.textContent = s.username;
-        selectEl.appendChild(opt);
-    });
-}
-
 function setActivePanel(panelId) {
-    navTabs.forEach(tab => tab.classList.toggle('is-active', tab.dataset.panel === panelId));
+    sidebarBtns.forEach(btn => {
+        btn.classList.toggle('is-active', btn.dataset.panel === panelId);
+    });
     [permissionPanel, reviewPanel, answerPanel].forEach(p => {
         if (p) p.classList.toggle('is-active', p.id === panelId);
     });
@@ -245,7 +232,7 @@ async function switchStudent(studentId) {
     const student = allStudents.find(s => Number(s.id) === Number(studentId));
     if (student) {
         studentNameDisplay.textContent = student.username;
-        studentNameTitle.textContent = student.username;
+        sidebarStudent.textContent = `学生：${student.username}`;
         studentSelect.value = studentId;
         currentSubject = null;
         const permContainer = document.getElementById('admin-permission-subject-buttons');
@@ -339,7 +326,6 @@ async function addStudent() {
     if (data && data.length > 0) {
         allStudents.push(data[0]);
         populatePermissionStudentSelect(allStudents);
-        populateStudentSelectFor(reviewStudentSelect, allStudents, '-- 请选择学生 --');
         studentSelect.value = data[0].id;
         await switchStudent(data[0].id);
         alert('新增学生成功！');
@@ -361,11 +347,8 @@ function switchReviewStudent(studentId) {
     if (!studentId) studentId = currentStudentId;
     currentReviewStudentId = studentId ? Number(studentId) : null;
     const student = allStudents.find(s => Number(s.id) === currentReviewStudentId);
-    if (reviewStudentName) {
-        reviewStudentName.textContent = student ? student.username : '选择学生';
-    }
-    if (reviewStudentSelect) {
-        reviewStudentSelect.value = studentId || '';
+    if (sidebarStudent && student) {
+        sidebarStudent.textContent = `学生：${student.username}`;
     }
     renderReviewTreeForCurrentSelection();
 }
@@ -429,9 +412,6 @@ function renderReviewTreeForCurrentSelection() {
 // ---------- 答案设置 ----------
 function switchAnswerSubject(subject) {
     currentAnswerSubject = subject || null;
-    if (answerSubjectName) {
-        answerSubjectName.textContent = subject || '选择科目';
-    }
     const container = document.getElementById('admin-answer-subject-buttons');
     if (container) {
         container.querySelectorAll('.subject-btn').forEach(b => {
@@ -462,7 +442,6 @@ export async function initAdmin() {
     allStudents = await loadStudents();
 
     populatePermissionStudentSelect(allStudents);
-    populateStudentSelectFor(reviewStudentSelect, allStudents, '-- 请选择学生 --');
 
     // 权限管理 - 科目按钮
     const permContainer = document.getElementById('admin-permission-subject-buttons');
@@ -489,9 +468,9 @@ export async function initAdmin() {
         switchAnswerSubject(allSubjects[0]);
     }
 
-    // 导航切换
-    navTabs.forEach(tab => {
-        tab.addEventListener('click', function () {
+    // 侧边栏切换
+    sidebarBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
             setActivePanel(this.dataset.panel);
         });
     });
@@ -501,8 +480,6 @@ export async function initAdmin() {
     if (allStudents.length > 0) {
         await switchStudent(allStudents[0].id);
         switchReviewStudent(currentStudentId);
-        if (reviewStudentName) reviewStudentName.textContent = allStudents[0].username;
-        if (reviewStudentSelect) reviewStudentSelect.value = String(allStudents[0].id);
         if (allSubjects.length > 0) {
             const pc = document.getElementById('admin-permission-subject-buttons');
             if (pc) {
@@ -516,8 +493,7 @@ export async function initAdmin() {
         }
     } else {
         studentNameDisplay.textContent = '无学生';
-        studentNameTitle.textContent = '无学生';
-        if (reviewStudentName) reviewStudentName.textContent = '无学生';
+        sidebarStudent.textContent = '学生：无';
     }
 
     // 事件绑定
@@ -525,6 +501,7 @@ export async function initAdmin() {
         const id = Number(this.value);
         if (id) {
             switchStudent(id);
+            switchReviewStudent(id);
             if (allSubjects.length > 0) {
                 const pc = document.getElementById('admin-permission-subject-buttons');
                 if (pc) {
@@ -533,14 +510,16 @@ export async function initAdmin() {
                     });
                 }
                 switchSubject(allSubjects[0]);
+                switchReviewSubject(allSubjects[0]);
             }
         } else {
             currentStudentId = null;
             studentNameDisplay.textContent = '未选择';
-            studentNameTitle.textContent = '选择学生';
+            sidebarStudent.textContent = '学生：未选择';
             treeContainer.innerHTML = '<p class="tree-placeholder">请先选择学生</p>';
             permissionDirty = false;
             updateSaveButton();
+            reviewTreeContainer.innerHTML = '<p class="tree-placeholder">请先选择学生</p>';
         }
     });
 
