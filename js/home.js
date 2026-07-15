@@ -1,85 +1,115 @@
 /**
- * home.js - 首页逻辑
- * 职责：登录/注册、科目卡片渲染、用户信息显示
+ * home.js - 底部登录/统计，书本卡片
  */
 
 import { login, register, logout, getCurrentUser, getPermissionIds } from './auth.js';
 import { loadBlogData } from './data-loader.js';
 
 // ---------- DOM 引用 ----------
-const loginArea = document.getElementById('login-area');
-const subjectWrapper = document.getElementById('subject-cards-wrapper');
+const navUserStatus = document.getElementById('nav-user-status');
+const navLoginBtn = document.getElementById('nav-login-btn');
+const navLogoutBtn = document.getElementById('nav-logout-btn');
+
+const loginSection = document.getElementById('login-section');
+const loggedInContent = document.getElementById('logged-in-content');
 const subjectContainer = document.getElementById('subject-cards-container');
+const scrollContainer = document.getElementById('subject-cards-scroll');
+
+const statsArea = document.getElementById('stats-area');
+const statsSubjects = document.getElementById('stats-subjects');
+const statsArticles = document.getElementById('stats-articles');
+
 const loginForm = document.getElementById('login-form');
 const usernameInput = document.getElementById('login-username');
 const registerBtn = document.getElementById('register-btn');
 const errorEl = document.getElementById('login-error');
-const logoutBtn = document.getElementById('logout-btn');
-const scrollContainer = document.getElementById('subject-cards-scroll');
-const userDisplayName = document.getElementById('user-display-name');
 
 let blogData = [];
 
-// ---------- 科目卡片渲染 ----------
+// ---------- 工具 ----------
 const ICON_MAP = { '英语': 'fa-language', '化学': 'fa-flask' };
-const DESC_MAP = { '英语': '语法逻辑构筑', '化学': '宏观微观交织' };
-
 function getIconForSubject(subject) {
     return ICON_MAP[subject] || 'fa-book';
 }
 
-function getDescriptionForSubject(subject) {
-    return DESC_MAP[subject] || '';
-}
-
-/**
- * 根据权限过滤并渲染科目卡片
- */
+// ---------- 渲染卡片 ----------
 function renderSubjects(blogs) {
-    const allSubjects = [...new Set(blogs.map(b => b.series))];
     const permissionIds = getPermissionIds().map(Number).filter(Number.isFinite);
+    const allowedBlogs = blogs.filter(b => permissionIds.includes(Number(b.id)));
 
-    const allowedSubjects = allSubjects.filter(subject =>
-        blogs.some(b => b.series === subject && permissionIds.includes(Number(b.id)))
-    );
+    const subjectMap = new Map();
+    allowedBlogs.forEach(b => {
+        const subject = b.series;
+        if (!subjectMap.has(subject)) subjectMap.set(subject, []);
+        subjectMap.get(subject).push(b);
+    });
 
-    if (allowedSubjects.length === 0) {
+    const subjects = Array.from(subjectMap.keys()).sort();
+
+    if (subjects.length === 0) {
         subjectContainer.innerHTML = `<p style="color:var(--gray);">您暂时没有可访问的科目，请联系管理员。</p>`;
+        statsSubjects.textContent = '0';
+        statsArticles.textContent = '0';
         return;
     }
 
-    subjectContainer.innerHTML = allowedSubjects.map(subject => {
+    statsSubjects.textContent = subjects.length;
+    statsArticles.textContent = allowedBlogs.length;
+
+    subjectContainer.innerHTML = subjects.map(subject => {
+        const count = subjectMap.get(subject).length;
         let cardClass = 'subject-card';
         if (subject === '英语') cardClass += ' card-english';
         else if (subject === '化学') cardClass += ' card-chemistry';
+
         return `
             <a href="category.html?subject=${encodeURIComponent(subject)}" class="${cardClass}">
                 <div class="card-icon"><i class="fas ${getIconForSubject(subject)}"></i></div>
                 <div class="card-name">${subject}</div>
-                <div class="card-desc">${getDescriptionForSubject(subject)}</div>
+                <div class="card-count">${count} 篇文章</div>
                 <div class="card-arrow"><i class="fas fa-arrow-right"></i></div>
             </a>
         `;
     }).join('');
 }
 
-/**
- * 更新顶部用户名显示
- */
-function updateUserDisplay(user) {
-    if (userDisplayName) {
-        userDisplayName.textContent = user ? `👤 ${user.username}` : '👤 未登录';
+// ---------- 更新导航 ----------
+function updateNav(user) {
+    if (user) {
+        navUserStatus.textContent = `${user.username}`;
+        navLoginBtn.style.display = 'none';
+        navLogoutBtn.style.display = 'inline-block';
+    } else {
+        navUserStatus.textContent = '未登录';
+        navLoginBtn.style.display = 'inline-block';
+        navLogoutBtn.style.display = 'none';
     }
 }
 
-/**
- * 登录成功后的处理：隐藏登录框，显示科目卡片
- */
-async function onLoginSuccess(user) {
-    updateUserDisplay(user);
-    loginArea.style.display = 'none';
-    subjectWrapper.classList.add('is-logged-in');
+// ---------- 切换视图 ----------
+function showLoggedIn(user) {
+    loginSection.style.display = 'none';
+    loggedInContent.style.display = 'block';
+    statsArea.style.display = 'flex';
+    loginForm.style.display = 'none';
+    updateNav(user);
+}
 
+function showLoggedOut() {
+    loginSection.style.display = 'block';
+    loggedInContent.style.display = 'none';
+    statsArea.style.display = 'none';
+    loginForm.style.display = 'flex';
+    updateNav(null);
+    subjectContainer.innerHTML = '';
+    statsSubjects.textContent = '0';
+    statsArticles.textContent = '0';
+    errorEl.textContent = '';
+}
+
+// ---------- 登录成功 ----------
+async function onLoginSuccess(user) {
+    showLoggedIn(user);
     blogData = await loadBlogData();
     if (blogData.length === 0) {
         subjectContainer.innerHTML = `<p style="color:var(--gray);">暂无文章数据，请稍后重试。</p>`;
@@ -88,22 +118,15 @@ async function onLoginSuccess(user) {
     renderSubjects(blogData);
 }
 
-/**
- * 退出登录：恢复登录界面
- */
+// ---------- 退出 ----------
 function handleLogout() {
     logout();
-    updateUserDisplay(null);
-    loginArea.style.display = 'block';
-    subjectWrapper.classList.remove('is-logged-in');
-    subjectContainer.innerHTML = '';
+    showLoggedOut();
     usernameInput.value = '';
     errorEl.textContent = '';
 }
 
-/**
- * 启用鼠标滚轮水平滚动（桌面端）
- */
+// ---------- 水平滚动 ----------
 function enableHorizontalScroll(container) {
     if (!container) return;
     container.addEventListener('wheel', function (e) {
@@ -118,24 +141,25 @@ function enableHorizontalScroll(container) {
 async function initHome() {
     const user = getCurrentUser();
     if (user) {
-        updateUserDisplay(user);
+        showLoggedIn(user);
         blogData = await loadBlogData();
         if (blogData.length) renderSubjects(blogData);
-        loginArea.style.display = 'none';
-        subjectWrapper.classList.add('is-logged-in');
     } else {
-        updateUserDisplay(null);
-        loginArea.style.display = 'block';
-        subjectWrapper.classList.remove('is-logged-in');
+        showLoggedOut();
+        // 导航“登录”按钮聚焦输入框
+        navLoginBtn.addEventListener('click', () => {
+            usernameInput.focus();
+        });
     }
 
-    // 登录
+    // 登录提交
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = usernameInput.value.trim();
         errorEl.textContent = '';
         if (!username) {
             errorEl.textContent = '请输入用户名';
+            usernameInput.focus();
             return;
         }
         try {
@@ -165,13 +189,15 @@ async function initHome() {
         }
     });
 
-    logoutBtn.addEventListener('click', handleLogout);
+    // 退出
+    navLogoutBtn.addEventListener('click', handleLogout);
+
     enableHorizontalScroll(scrollContainer);
 }
 
 initHome();
 
-// ---------- 快捷键：三次 '+' 进入管理员 ----------
+// ---------- 管理员快捷键 ----------
 let plusCount = 0;
 let timer = null;
 document.addEventListener('keydown', function (e) {

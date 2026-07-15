@@ -10,50 +10,69 @@
 </head>
 
 <body>
-    <div class="home-container">
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <span class="nav-logo">学习资料仓库</span>
+            <div class="nav-right">
+                <span id="nav-user-status" class="nav-user-status">未登录</span>
+                <button id="nav-login-btn" class="nav-btn nav-btn-login">登录</button>
+                <button id="nav-logout-btn" class="nav-btn nav-btn-logout" style="display:none;">退出</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容：flex 列，内容顶部，底部固定 -->
+    <main class="main-content">
+
+        <!-- 装饰圆点 -->
         <div class="deco-dot dot1"></div>
         <div class="deco-dot dot2"></div>
-        <div class="home-content">
-            <h1 class="home-title">📖 学习资料仓库</h1>
-            <p class="home-subtitle">选择科目，开始学习</p>
 
-            <!-- 登录区域（未登录时显示） -->
-            <div id="login-area" class="login-box">
-                <h2>🔐 登录</h2>
-                <p class="sub">请输入您的用户名</p>
-                <form id="login-form">
-                    <input type="text" id="login-username" placeholder="你的用户名" required autofocus />
-                    <div class="login-actions">
-                        <button type="submit" class="login-btn">登录</button>
-                        <button type="button" id="register-btn" class="register-btn">注册</button>
-                    </div>
-                    <div id="login-error" class="login-error"></div>
-                </form>
-                <div class="login-info">💡 新注册用户默认无权限</div>
+        <!-- 上部内容 -->
+        <div class="content-top">
+            <!-- 未登录：显示大标题 -->
+            <div id="login-section" class="login-section">
+                <h1 class="login-title">学习资料仓库</h1>
             </div>
 
-            <!-- 科目卡片（登录后显示） -->
-            <div id="subject-cards-wrapper" class="subject-cards-wrapper">
-                <!-- 用户信息和退出登录 -->
-                <div class="user-info-bar">
-                    <span id="user-display-name" class="user-name">👤 未登录</span>
-                    <button id="logout-btn" class="logout-btn-primary">
-                        <i class="fas fa-sign-out-alt"></i> 退出登录
-                    </button>
-                </div>
-                <!-- 滚动容器 -->
+            <!-- 已登录：学科卡片区域 -->
+            <div id="logged-in-content" class="logged-in-content" style="display:none;">
                 <div class="subject-cards-scroll" id="subject-cards-scroll">
                     <div class="subject-cards" id="subject-cards-container">
                         <!-- 由 home.js 动态渲染 -->
                     </div>
                 </div>
             </div>
-
-            <footer class="home-footer"><span>✨ 从全新角度理解高中知识 ✨</span></footer>
         </div>
-    </div>
 
-    <!-- 引入 Supabase 和业务逻辑 -->
+        <!-- 底部固定区域：登录时显示统计，未登录显示登录表单 -->
+        <div class="bottom-fixed">
+            <!-- 统计信息（登录后显示） -->
+            <div id="stats-area" class="stats-area" style="display:none;">
+                <div class="stats-item">
+                    <span class="stats-number" id="stats-subjects">0</span>
+                    <span class="stats-label">门学科</span>
+                </div>
+                <div class="stats-divider"></div>
+                <div class="stats-item">
+                    <span class="stats-number" id="stats-articles">0</span>
+                    <span class="stats-label">篇文章</span>
+                </div>
+            </div>
+
+            <!-- 登录表单（未登录时显示） -->
+            <form id="login-form" class="login-form" style="display:flex;">
+                <input type="text" id="login-username" placeholder="你的用户名" required autofocus />
+                <button type="submit" class="login-btn">进入</button>
+                <button type="button" id="register-btn" class="register-btn">注册</button>
+                <div id="login-error" class="login-error"></div>
+            </form>
+        </div>
+
+    </main>
+
     <script type="importmap">
         {
             "imports": {
