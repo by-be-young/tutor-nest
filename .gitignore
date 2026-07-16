@@ -1,0 +1,109 @@
+# 依赖目录
+node_modules/
+jspm_packages/
+
+# 缓存目录
+.cache/
+.gh-pages-cache/
+.parcel-cache/
+.nuxt/
+.next/
+.vuepress/dist/
+
+# 构建输出目录
+dist/
+build/
+out/
+www/
+public/
+
+# 日志文件
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 本地持久化数据
+.DS_Store
+Thumbs.db
+*.pid
+*.seed
+*.pid.lock
+
+# 测试覆盖率目录
+coverage/
+*.lcov
+.nyc_output/
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+*.temp
+
+# 编辑器目录
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.bsconfig.json
+
+# 操作系统文件
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# 打包文件
+*.tgz
+*.tar.gz
+*.zip
+*.rar
+
+# 特定工具文件
+# Yarn
+.yarn/
+.yarnrc
+.yarnclean
+.pnp.*
+.yarn-integrity
+
+# pnpm
+.pnpm-store/
+
+# TypeScript 缓存
+*.tsbuildinfo
+
+# Next.js
+.next/out/
+.next/
+out/
+
+# Nuxt.js
+.nuxt/
+.output/
+
+# Vite
+.vite/
+vite.config.js.timestamp-*
+
+# ESLint 和 Prettier
+.eslintcache
+.prettiercache
+
+# 应用特定文件
+# 如果项目中有其他特殊目录，在这里添加
