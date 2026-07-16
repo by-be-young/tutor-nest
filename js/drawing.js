@@ -85,17 +85,19 @@
         return e.pointerType === 'pen';
     }
 
-    // 阻止触控笔导致的页面滚动
+    // 核心：统一阻止所有触控笔相关的滚动行为
     function preventPenScroll(e) {
         if (e.pointerType === 'pen') {
             e.preventDefault();
+            return false;
         }
+        return true;
     }
 
     // 绘制事件
     function startDraw(e) {
         if (!allowDrawing(e)) return;
-        e.preventDefault();
+        preventPenScroll(e);
         stopFade();
         clearTimeout(clearTimer);
         canvas.style.opacity = '1';
@@ -111,7 +113,7 @@
             stopDraw();
             return;
         }
-        e.preventDefault();
+        preventPenScroll(e);
         const x = e.clientX;
         const y = e.clientY;
         ctx.beginPath();
@@ -130,15 +132,38 @@
         isDrawing = false;
     }
 
-    // 注册全局指针事件
+    // ---- 注册全局事件监听（强化滚动阻止） ----
+
+    // 1. 指针事件（用于绘制）
     document.addEventListener('pointerdown', startDraw);
     document.addEventListener('pointermove', draw);
     document.addEventListener('pointerup', stopDraw);
     document.addEventListener('pointerleave', stopDraw);
 
-    // 阻止触控笔相关的默认滚动行为
-    document.addEventListener('touchmove', preventPenScroll, { passive: false });
-    document.addEventListener('pointermove', preventPenScroll, { passive: false });
+    // 2. 阻止触控笔引起的滚动（使用 capture 阶段，确保优先拦截）
+    document.addEventListener('touchmove', function (e) {
+        // 检查触控点是否来自触控笔（通过 touch 对象的 pointerType 无法直接获取）
+        // 使用 passive: false 允许 preventDefault
+        // 由于 touchmove 没有 pointerType，我们通过检查绘制状态和画布交互来判断
+        // 更准确的方法：在 pointerdown 时标记绘制状态，touchmove 时阻止默认行为
+        if (isDrawing) {
+            e.preventDefault();
+        }
+    }, { passive: false, capture: true });
+
+    // 3. 额外阻止鼠标滚轮滚动（如果触控笔模拟了滚轮）
+    document.addEventListener('wheel', function (e) {
+        if (isDrawing) {
+            e.preventDefault();
+        }
+    }, { passive: false, capture: true });
+
+    // 4. 阻止触控笔相关的其他默认手势
+    document.addEventListener('gesturestart', function (e) {
+        if (isDrawing) {
+            e.preventDefault();
+        }
+    }, { passive: false, capture: true });
 
     // 清理
     window.addEventListener('beforeunload', function () {
@@ -149,7 +174,8 @@
         document.removeEventListener('pointerup', stopDraw);
         document.removeEventListener('pointerleave', stopDraw);
         document.removeEventListener('touchmove', preventPenScroll);
-        document.removeEventListener('pointermove', preventPenScroll);
+        document.removeEventListener('wheel', preventPenScroll);
+        document.removeEventListener('gesturestart', preventPenScroll);
         if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
     });
 
