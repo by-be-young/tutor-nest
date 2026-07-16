@@ -10,7 +10,7 @@
         return;
     }
 
-    // ---- 创建画布 ----
+    // 创建画布
     const canvas = document.createElement('canvas');
     canvas.style.position = 'fixed';
     canvas.style.top = '0';
@@ -31,7 +31,7 @@
     const CLEAR_DELAY = 3000;
     const FADE_DURATION = 800;
 
-    // ---- 调整画布尺寸 ----
+    // 调整画布尺寸
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -39,13 +39,13 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // ---- 清除所有线条（直接清除，无淡出） ----
+    // 清除所有线条（直接清除，无淡出）
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.style.opacity = '1';
     }
 
-    // ---- 停止淡出动画 ----
+    // 停止淡出动画
     function stopFade() {
         if (fadeId) {
             cancelAnimationFrame(fadeId);
@@ -54,7 +54,7 @@
         canvas.style.opacity = '1';
     }
 
-    // ---- 启动淡出 ----
+    // 启动淡出
     function triggerFade() {
         if (fadeId) return;
         fadeStartTime = performance.now();
@@ -73,23 +73,29 @@
         fadeId = requestAnimationFrame(fadeStep);
     }
 
-    // ---- 重置清除计时器 ----
+    // 重置清除计时器
     function resetClearTimer() {
         stopFade();
         clearTimeout(clearTimer);
         clearTimer = setTimeout(triggerFade, CLEAR_DELAY);
     }
 
-    // ---- 检查是否允许绘制（修改点：仅允许触控笔） ----
+    // 检查是否允许绘制：仅允许触控笔
     function allowDrawing(e) {
-        const type = e.pointerType;
-        // 只允许触控笔（平板笔），鼠标和触摸一律禁止
-        return type === 'pen';
+        return e.pointerType === 'pen';
     }
 
-    // ---- 绘制事件 ----
+    // 阻止触控笔导致的页面滚动
+    function preventPenScroll(e) {
+        if (e.pointerType === 'pen') {
+            e.preventDefault();
+        }
+    }
+
+    // 绘制事件
     function startDraw(e) {
         if (!allowDrawing(e)) return;
+        e.preventDefault();
         stopFade();
         clearTimeout(clearTimer);
         canvas.style.opacity = '1';
@@ -105,6 +111,7 @@
             stopDraw();
             return;
         }
+        e.preventDefault();
         const x = e.clientX;
         const y = e.clientY;
         ctx.beginPath();
@@ -123,13 +130,17 @@
         isDrawing = false;
     }
 
-    // ---- 注册全局指针事件 ----
+    // 注册全局指针事件
     document.addEventListener('pointerdown', startDraw);
     document.addEventListener('pointermove', draw);
     document.addEventListener('pointerup', stopDraw);
     document.addEventListener('pointerleave', stopDraw);
 
-    // ---- 清理 ----
+    // 阻止触控笔相关的默认滚动行为
+    document.addEventListener('touchmove', preventPenScroll, { passive: false });
+    document.addEventListener('pointermove', preventPenScroll, { passive: false });
+
+    // 清理
     window.addEventListener('beforeunload', function () {
         clearTimeout(clearTimer);
         stopFade();
@@ -137,6 +148,8 @@
         document.removeEventListener('pointermove', draw);
         document.removeEventListener('pointerup', stopDraw);
         document.removeEventListener('pointerleave', stopDraw);
+        document.removeEventListener('touchmove', preventPenScroll);
+        document.removeEventListener('pointermove', preventPenScroll);
         if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
     });
 
