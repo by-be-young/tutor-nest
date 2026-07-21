@@ -261,6 +261,7 @@
     line-height: 1.85;
     color: #2d4a3a;
     font-size: 1.05rem;
+    overflow: visible;
 }
 
 .detail-body h1 {
@@ -385,6 +386,8 @@
 .detail-main-column {
     flex: 2;
     min-width: 0;
+    overflow: visible !important;
+    position: relative;
 }
 
 .detail-sidebar-column {

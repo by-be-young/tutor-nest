@@ -48,7 +48,7 @@
                         <i class="fas fa-key"></i> 设置答案
                     </button>
                 </nav>
-                <!-- 侧边栏底部（可放置当前学生信息等） -->
+                <!-- 侧边栏底部 -->
                 <div class="admin-sidebar-footer">
                     <span id="admin-sidebar-student">学生：未选择</span>
                 </div>
@@ -63,6 +63,15 @@
                         <div class="control-group">
                             <label><i class="fas fa-book"></i> 选择科目：</label>
                             <div id="admin-permission-subject-buttons" class="subject-btn-group"></div>
+                        </div>
+                        <!-- 新增筛选器 -->
+                        <div class="control-group">
+                            <label><i class="fas fa-filter"></i> 显示：</label>
+                            <div class="subject-btn-group" id="permission-filter-group">
+                                <button class="subject-btn is-active" data-filter="unauthorized">未授权</button>
+                                <button class="subject-btn" data-filter="authorized">已授权</button>
+                                <button class="subject-btn" data-filter="all">全部</button>
+                            </div>
                         </div>
                     </div>
                     <div id="admin-permission-tree" class="admin-tree">
@@ -81,6 +90,15 @@
                             <label><i class="fas fa-book"></i> 选择科目：</label>
                             <div id="admin-review-subject-buttons" class="subject-btn-group"></div>
                         </div>
+                        <!-- 新增筛选器 -->
+                        <div class="control-group">
+                            <label><i class="fas fa-filter"></i> 显示：</label>
+                            <div class="subject-btn-group" id="review-filter-group">
+                                <button class="subject-btn is-active" data-filter="pending">待批阅</button>
+                                <button class="subject-btn" data-filter="reviewed">已批阅</button>
+                                <button class="subject-btn" data-filter="noneed">无需批阅</button>
+                            </div>
+                        </div>
                     </div>
                     <div id="admin-review-tree" class="admin-tree">
                         <p class="tree-placeholder">请先选择学生和科目</p>
@@ -97,6 +115,15 @@
                         <div class="control-group">
                             <label><i class="fas fa-book"></i> 选择科目：</label>
                             <div id="admin-answer-subject-buttons" class="subject-btn-group"></div>
+                        </div>
+                        <!-- 新增筛选器 -->
+                        <div class="control-group">
+                            <label><i class="fas fa-filter"></i> 显示：</label>
+                            <div class="subject-btn-group" id="answer-filter-group">
+                                <button class="subject-btn is-active" data-filter="unset">待设置</button>
+                                <button class="subject-btn" data-filter="set">已设置</button>
+                                <button class="subject-btn" data-filter="noneed">无需设置</button>
+                            </div>
                         </div>
                     </div>
                     <div id="admin-answer-tree" class="admin-tree">

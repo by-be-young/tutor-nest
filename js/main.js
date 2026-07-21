@@ -87,8 +87,18 @@ async function loadMarkdownContent(relativePath) {
         return '# 加载失败\n\n无法读取文章内容，请稍后重试。';
     }
 }
+/**
+ * 在 Markdown 的数学公式（$...$ / $$...$$）内，将 _ 转义为 \_
+ * 防止 marked 将 LaTeX 下标 _ 误当作强调语法，导致解析卡死
+ */
+function escapeUnderscoresInMath(markdown) {
+    return markdown.replace(/(\$\$[^$]*\$\$|\$[^$]*\$)/g, (match) => {
+        return match.replace(/_/g, '\\_');
+    });
+}
 function renderMarkdown(markdown) {
-    return typeof marked !== 'undefined' ? marked.parse(markdown) : `<pre>${markdown}</pre>`;
+    const safe = escapeUnderscoresInMath(markdown);
+    return typeof marked !== 'undefined' ? marked.parse(safe) : `<pre>${markdown}</pre>`;
 }
 
 // ---------- 目录树构建（分类页用） ----------

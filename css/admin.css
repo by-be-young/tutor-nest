@@ -262,51 +262,60 @@ body {
     margin-bottom: 20px;
 }
 
-/* ----- 控制组 ----- */
+/* ----- 控制组（科目 + 筛选） ----- */
 .admin-controls {
     display: flex;
     flex-wrap: wrap;
-    gap: 24px;
+    gap: 24px 40px;
+    /* 行间距24px，列间距40px */
     margin-bottom: 18px;
     padding: 14px 18px;
     background: rgba(255, 255, 255, 0.5);
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.5);
+    align-items: flex-end;
+    /* 让标签和按钮组底部对齐，视觉更整洁 */
 }
 
 .control-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    flex: 1;
-    min-width: 150px;
+    flex: 0 1 auto;
+    /* 不强行拉伸，由内容撑开 */
+    min-width: 140px;
 }
 
 .control-group label {
     font-size: 0.85rem;
     font-weight: 600;
     color: #4c6b5b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-/* ----- 科目按钮组 ----- */
+/* ----- 科目按钮组 & 筛选按钮组（共用 subject-btn） ----- */
 .subject-btn-group {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
     padding: 4px 0;
+    align-items: center;
 }
 
 .subject-btn {
-    padding: 8px 20px;
+    padding: 6px 18px;
     border-radius: 20px;
     border: 1.5px solid rgba(120, 170, 155, 0.3);
     background: rgba(255, 255, 255, 0.8);
     color: #4c6b5b;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
     white-space: nowrap;
+    font-family: inherit;
 }
 
 .subject-btn:hover {
@@ -315,6 +324,7 @@ body {
     transform: translateY(-1px);
 }
 
+/* 激活状态（兼顾科目按钮和筛选按钮） */
 .subject-btn.is-active {
     background: linear-gradient(135deg, rgba(255, 248, 214, 0.95), rgba(243, 227, 162, 0.85));
     border-color: #d9ba4b;
@@ -341,6 +351,17 @@ body {
     cursor: default;
 }
 
+/* 文件夹交互：可点击，手型，悬停反馈 */
+.admin-tree .tree-folder {
+    cursor: pointer;
+    user-select: none;
+}
+
+.admin-tree .tree-folder:hover {
+    background: rgba(255, 248, 214, 0.4);
+}
+
+/* 文件点击 */
 .admin-tree .tree-clickable {
     cursor: pointer;
 }
@@ -351,14 +372,19 @@ body {
 
 .admin-tree .tree-item .file-name {
     flex: 1;
+    font-size: 0.95rem;
 }
 
+/* 文件夹的子容器（可折叠） */
 .admin-tree .tree-children {
     border-left: 2px dashed rgba(120, 170, 155, 0.25);
     margin-left: 20px;
     padding-left: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease;
 }
 
+/* 权限复选框 */
 .admin-tree .perm-checkbox-label {
     display: flex;
     align-items: center;
@@ -367,6 +393,7 @@ body {
     color: #5a7a6a;
     cursor: pointer;
     margin-left: 8px;
+    flex-shrink: 0;
 }
 
 .admin-tree .perm-checkbox-label input[type="checkbox"] {
@@ -374,6 +401,33 @@ body {
     height: 18px;
     accent-color: #7BC8C4;
     cursor: pointer;
+}
+
+/* ----- 待批阅徽章（树中显示） ----- */
+.tree-badge {
+    background: #f6c445;
+    color: #5a4300;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 12px;
+    border-radius: 30px;
+    margin-left: 6px;
+    white-space: nowrap;
+    display: inline-block;
+    border: 1px solid rgba(200, 160, 50, 0.3);
+    flex-shrink: 0;
+}
+
+.tree-badge.is-warning {
+    background: #f6c445;
+}
+
+/* 文件右侧箭头（提示点击进入） */
+.file-arrow {
+    color: #b0c8c0;
+    font-size: 0.75rem;
+    margin-left: 4px;
+    flex-shrink: 0;
 }
 
 .tree-placeholder {
@@ -405,6 +459,12 @@ body {
 /* ============================================================
    响应式
    ============================================================ */
+
+@media (max-width: 1024px) {
+    .admin-app {
+        min-width: auto;
+    }
+}
 
 @media (max-width: 820px) {
     .admin-body {
@@ -438,6 +498,16 @@ body {
 
     .admin-content {
         padding: 18px 16px 24px;
+    }
+
+    .admin-controls {
+        gap: 16px;
+        padding: 12px 14px;
+    }
+
+    .control-group {
+        min-width: 100%;
+        flex-basis: 100%;
     }
 }
 
@@ -479,10 +549,11 @@ body {
 
     .control-group {
         min-width: 100%;
+        flex-basis: 100%;
     }
 
     .subject-btn {
-        padding: 6px 14px;
+        padding: 5px 12px;
         font-size: 0.8rem;
     }
 
@@ -507,9 +578,18 @@ body {
         flex-wrap: wrap;
     }
 
+    .admin-tree .tree-children {
+        margin-left: 12px;
+    }
+
     .admin-tip {
         font-size: 0.85rem;
         padding: 10px 14px;
         flex-wrap: wrap;
+    }
+
+    .tree-badge {
+        font-size: 0.6rem;
+        padding: 1px 8px;
     }
 }
