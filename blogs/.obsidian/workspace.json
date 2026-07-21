@@ -92,8 +92,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "c77f374ae22d138a",
@@ -195,8 +194,9 @@
       "bases:新建数据库": false
     }
   },
-  "active": "1712e4e1c7e6f154",
+  "active": "b50f5057c5afa94d",
   "lastOpenFiles": [
+    "图片/元素周期表.png",
     "化学/课后练习/0 物质的量-课后练习.md",
     "化学/理论课讲义/1 原子与离子.md",
     "化学/化学课程系统安排.md",
