@@ -1,591 +1,154 @@
 /**
- * katex-loader.js - 公式滚动终极修复版（纯 JS 强制）
- * 
- * 核心策略：
- * 1. 用 JS 强制所有父容器 overflow: visible
- * 2. 公式强制不换行
- * 3. 创建滚动容器并强制滚动生效
- * 4. 支持鼠标滚轮、拖拽、触摸
+ * katex-loader.js - 超长公式强制换行（纯 JS 内联样式覆盖版）
+ * 彻底解决 CSS 被覆盖的问题
  */
-
 (function () {
     'use strict';
-
-    // ================================================================
-    // 一、CDN 资源地址配置
-    // ================================================================
 
     const KATEX_CSS = 'https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.css';
     const KATEX_JS = 'https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.js';
     const AUTORENDER_JS = 'https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js';
-
     const RENDER_TIMEOUT = 8000;
-    let isLoaded = false;
-    let loadPromise = null;
 
-    // ================================================================
-    // 二、资源加载
-    // ================================================================
+    let isLoaded = false, loadPromise = null;
 
+    // ---------- 加载 ----------
     function loadCSS(href) {
         if (document.querySelector(`link[href="${href}"]`)) return;
         const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
+        link.rel = 'stylesheet'; link.href = href;
         document.head.appendChild(link);
     }
-
     function loadScript(src) {
         return new Promise((resolve, reject) => {
-            const existing = document.querySelector(`script[src="${src}"]`);
-            if (existing) {
-                if (existing.dataset.loaded === 'true') {
-                    resolve();
-                    return;
-                }
-                existing.addEventListener('load', resolve);
-                existing.addEventListener('error', reject);
+            const exist = document.querySelector(`script[src="${src}"]`);
+            if (exist) {
+                exist.dataset.loaded === 'true' ? resolve() :
+                    (exist.addEventListener('load', resolve), exist.addEventListener('error', reject));
                 return;
             }
-            const script = document.createElement('script');
-            script.src = src;
-            script.async = true;
-            script.onload = () => {
-                script.dataset.loaded = 'true';
-                resolve();
-            };
-            script.onerror = reject;
-            document.head.appendChild(script);
+            const s = document.createElement('script');
+            s.src = src; s.async = true;
+            s.onload = () => { s.dataset.loaded = 'true'; resolve(); };
+            s.onerror = reject;
+            document.head.appendChild(s);
         });
     }
-
     function loadKatex() {
         if (isLoaded) return Promise.resolve(window.katex);
         if (loadPromise) return loadPromise;
-
         loadCSS(KATEX_CSS);
-
-        loadPromise = loadScript(KATEX_JS)
-            .then(() => loadScript(AUTORENDER_JS))
-            .then(() => {
-                isLoaded = true;
-                return window.katex;
-            })
-            .catch(err => {
-                console.warn('KaTeX 加载失败:', err);
-                loadPromise = null;
-                throw err;
-            });
-
+        loadPromise = loadScript(KATEX_JS).then(() => loadScript(AUTORENDER_JS))
+            .then(() => { isLoaded = true; return window.katex; })
+            .catch(e => { loadPromise = null; throw e; });
         return loadPromise;
     }
 
-    // ================================================================
-    // 三、公式预处理
-    // ================================================================
-
+    // ---------- 预处理 ----------
     function preprocessMathContent(text) {
-        if (!text || typeof text !== 'string') return text || '';
-        let result = text.replace(/\\cdotp/g, '\\cdot');
-        result = result.replace(/(\\text\{[^}]*?)\\cdotp/g, '$1\\cdot');
-        return result;
+        return (typeof text === 'string') ? text.replace(/\\cdotp/g, '\\cdot') : text || '';
     }
-
-    function preprocessElementContent(element) {
-        const clone = element.cloneNode(true);
-
-        function walkTextNodes(node) {
-            if (node.nodeType === Node.TEXT_NODE) {
-                node.textContent = preprocessMathContent(node.textContent);
-                return;
-            }
-            if (node.nodeType === Node.ELEMENT_NODE) {
-                const skipTags = ['code', 'pre', 'script', 'style', 'katex'];
-                if (skipTags.includes(node.tagName.toLowerCase()) ||
-                    node.classList.contains('katex')) {
-                    return;
-                }
-                node.childNodes.forEach(child => walkTextNodes(child));
+    function preprocessElementContent(el) {
+        const clone = el.cloneNode(true);
+        function walk(node) {
+            if (node.nodeType === 3) { node.textContent = preprocessMathContent(node.textContent); return; }
+            if (node.nodeType === 1) {
+                const tag = node.tagName.toLowerCase();
+                if (['code', 'pre', 'script', 'style'].includes(tag) || node.classList.contains('katex')) return;
+                node.childNodes.forEach(walk);
             }
         }
-
-        walkTextNodes(clone);
-        element.innerHTML = clone.innerHTML;
+        walk(clone);
+        el.innerHTML = clone.innerHTML;
     }
 
-    // ================================================================
-    // 四、获取主栏宽度
-    // ================================================================
-
-    function getMainColumnWidth(element) {
-        if (!element) return window.innerWidth - 40;
-
-        // 查找 detail-main-column
-        let container = element.closest('.detail-main-column');
-        if (container) {
-            const rect = container.getBoundingClientRect();
-            if (rect.width > 0) return rect.width - 16;
-        }
-
-        // 查找 detail-section-two-column
-        container = element.closest('.detail-section-two-column');
-        if (container) {
-            const mc = container.querySelector('.detail-main-column');
-            if (mc) {
-                const rect = mc.getBoundingClientRect();
-                if (rect.width > 0) return rect.width - 16;
-            }
-        }
-
-        // 查找 detail-body
-        container = element.closest('.detail-body');
-        if (container) {
-            const rect = container.getBoundingClientRect();
-            if (rect.width > 0) return rect.width - 32;
-        }
-
-        return window.innerWidth - 40;
-    }
-
-    // ================================================================
-    // 五、强制修复所有父容器（纯 JS 强制）
-    // ================================================================
-
-    function forceFixContainers(container) {
+    /**
+ * 加强版：不仅修正 KaTeX 内部，还强制修正父容器的 nowrap
+ */
+    function forceBreakAllKatex(container) {
         if (!container) return;
 
-        // 修复所有可能阻止滚动的父元素
-        // 注意：不去修改 .detail-main-column（保持 overflow:hidden 以防止公式溢出）
-        // 也不去修改 .detail-section-two-column（防止破坏侧栏 position:sticky）
-        const elementsToFix = container.querySelectorAll(
-            '.detail-body, .detail-container'
-        );
-
-        elementsToFix.forEach(el => {
-            el.style.overflow = 'visible';
-            el.style.overflowX = 'visible';
-            el.style.overflowY = 'visible';
-            el.style.maxWidth = '100%';
+        // ========== 1. 先处理所有 KaTeX 内部元素 ==========
+        const allKatex = container.querySelectorAll('[class*="katex"]');
+        allKatex.forEach(el => {
+            // 清除可能的内联 nowrap，并强制设置换行
+            if (el.style.whiteSpace === 'nowrap') el.style.whiteSpace = 'normal';
+            el.style.setProperty('white-space', 'normal', 'important');
+            el.style.setProperty('word-break', 'break-all', 'important');
+            el.style.setProperty('overflow-wrap', 'anywhere', 'important');
+            el.style.setProperty('max-width', '100%', 'important');
         });
 
-        // 也修复 container 本身
-        container.style.overflow = 'visible';
-        container.style.overflowX = 'visible';
-        container.style.overflowY = 'visible';
+        // .katex-display 设为块级，限制宽度
+        const displays = container.querySelectorAll('.katex-display');
+        displays.forEach(disp => {
+            disp.style.setProperty('display', 'block', 'important');
+            disp.style.setProperty('max-width', '100%', 'important');
+            disp.style.setProperty('overflow', 'visible', 'important');
+        });
+
+        // 关键：.katex-display .base 必须变成 block + width:100%
+        const bases = container.querySelectorAll('.katex-display .base');
+        bases.forEach(base => {
+            base.style.setProperty('display', 'block', 'important');
+            base.style.setProperty('width', '100%', 'important');
+            base.style.setProperty('max-width', '100%', 'important');
+            base.style.setProperty('white-space', 'normal', 'important');
+            base.style.setProperty('word-break', 'break-all', 'important');
+            base.style.setProperty('overflow-wrap', 'anywhere', 'important');
+        });
+
+        // ========== 2. 向上追溯父容器，强制清除 nowrap ==========
+        // 找到每个公式的最近父元素（p, li, div, td, th 等）
+        const formulaParents = new Set();
+        container.querySelectorAll('.katex-display, .katex').forEach(formula => {
+            let parent = formula.parentElement;
+            while (parent && parent !== container && !parent.classList.contains('detail-body')) {
+                // 只处理常见的文本容器
+                if (['P', 'LI', 'DIV', 'TD', 'TH', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'SECTION'].includes(parent.tagName)) {
+                    formulaParents.add(parent);
+                }
+                parent = parent.parentElement;
+            }
+        });
+
+        formulaParents.forEach(parent => {
+            // 移除 nowrap，允许换行
+            parent.style.setProperty('white-space', 'normal', 'important');
+            parent.style.setProperty('word-break', 'break-all', 'important');
+            parent.style.setProperty('overflow-wrap', 'anywhere', 'important');
+            // 限制最大宽度，防止被内容撑开
+            parent.style.setProperty('max-width', '100%', 'important');
+            // 若需要，也可以设置宽度
+            parent.style.setProperty('width', '100%', 'important'); // 小心使用，可能破坏布局，但为了断行可以尝试
+            // 确保 overflow 可见
+            parent.style.setProperty('overflow', 'visible', 'important');
+        });
+
+        // ========== 3. 最终确保 .detail-body 不限制 ==========
+        const body = container.closest('.detail-body') || container;
+        body.style.setProperty('overflow', 'visible', 'important');
+        body.style.setProperty('overflow-x', 'visible', 'important');
     }
 
-    // ================================================================
-    // 六、创建滚动容器（核心）
-    // ================================================================
-
-    function wrapWithScrollContainer(element, maxWidth) {
-        const parent = element.parentElement;
-
-        // 如果已经是滚动容器
-        if (parent.classList.contains('formula-scroll-wrapper')) {
-            parent.style.maxWidth = maxWidth + 'px';
-            parent.style.width = '100%';
-            parent.style.overflowX = 'auto';
-            parent.style.overflowY = 'hidden';
-            return parent;
-        }
-
-        // 创建滚动容器
-        const wrapper = document.createElement('div');
-        wrapper.className = 'formula-scroll-wrapper';
-
-        // 强制样式
-        wrapper.style.cssText = `
-            overflow-x: auto !important;
-            overflow-y: hidden !important;
-            padding: 6px 2px !important;
-            margin: 4px 0 !important;
-            max-width: ${maxWidth}px !important;
-            width: 100% !important;
-            min-width: 50px !important;
-            -webkit-overflow-scrolling: touch !important;
-            touch-action: pan-x !important;
-            cursor: grab !important;
-            display: block !important;
-            scrollbar-width: thin !important;
-            scrollbar-color: #ccc #f0f0f0 !important;
-            min-height: 40px !important;
-            background: transparent !important;
-            border: none !important;
-            outline: none !important;
-            box-sizing: border-box !important;
-        `;
-
-        // 替换
-        parent.replaceChild(wrapper, element);
-        wrapper.appendChild(element);
-
-        // ===== 确保滚动生效：强制触发重排 =====
-        // 先设置 scrollLeft 为 0，然后读取 scrollWidth 触发重排
-        wrapper.scrollLeft = 0;
-        const hasScroll = wrapper.scrollWidth > wrapper.clientWidth + 2;
-
-        if (hasScroll) {
-            wrapper.classList.add('has-scroll');
-        }
-
-        // ===== 触控笔标记（通过 pointerdown 可靠检测，TouchEvent 无 pointerType） =====
-        let _isPenInteraction = false;
-
-        wrapper.addEventListener('pointerdown', function (e) {
-            if (e.pointerType === 'pen') {
-                _isPenInteraction = true;
-                // 阻止触控笔继续传播事件
-                e.preventDefault();
-                e.stopPropagation();
-                return;
-            }
-            // 手指/鼠标：清除标记
-            _isPenInteraction = false;
-        }, { passive: false, capture: true });
-
-        wrapper.addEventListener('pointerup', function () {
-            _isPenInteraction = false;
-        });
-        wrapper.addEventListener('pointercancel', function () {
-            _isPenInteraction = false;
-        });
-
-        // ===== 滚轮支持（阻止触控笔） =====
-        wrapper.addEventListener('wheel', function (e) {
-            if (_isPenInteraction) return;
-            if (wrapper.scrollWidth <= wrapper.clientWidth + 2) return;
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            const deltaX = e.deltaY || e.detail || 0;
-            wrapper.scrollLeft += deltaX;
-        }, { passive: false, capture: true });
-
-        // ===== 鼠标拖拽（阻止触控笔） =====
-        let isDragging = false;
-        let startX = 0;
-        let startScrollLeft = 0;
-
-        wrapper.addEventListener('mousedown', function (e) {
-            if (_isPenInteraction) return;
-            if (e.button !== 0) return;
-            if (wrapper.scrollWidth <= wrapper.clientWidth + 2) return;
-
-            isDragging = true;
-            startX = e.clientX;
-            startScrollLeft = wrapper.scrollLeft;
-            wrapper.style.cursor = 'grabbing';
-            wrapper.style.userSelect = 'none';
-            e.preventDefault();
-        });
-
-        document.addEventListener('mousemove', function (e) {
-            if (!isDragging) return;
-            const deltaX = startX - e.clientX;
-            wrapper.scrollLeft = startScrollLeft + deltaX;
-            e.preventDefault();
-        });
-
-        document.addEventListener('mouseup', function () {
-            if (isDragging) {
-                isDragging = false;
-                wrapper.style.cursor = 'grab';
-                wrapper.style.userSelect = '';
-            }
-        });
-
-        // ===== 触摸支持（手指滑动，触控笔被标记拦截） =====
-        let touchStartX = 0;
-        let touchStartScrollLeft = 0;
-        let isTouching = false;
-
-        wrapper.addEventListener('touchstart', function (e) {
-            if (_isPenInteraction) return;
-            const touch = e.touches[0];
-            if (!touch) return;
-            if (wrapper.scrollWidth <= wrapper.clientWidth + 2) return;
-
-            isTouching = true;
-            touchStartX = touch.clientX;
-            touchStartScrollLeft = wrapper.scrollLeft;
-        }, { passive: true });
-
-        wrapper.addEventListener('touchmove', function (e) {
-            if (!isTouching || _isPenInteraction) return;
-
-            const touch = e.touches[0];
-            if (!touch) return;
-
-            const deltaX = touchStartX - touch.clientX;
-            wrapper.scrollLeft = touchStartScrollLeft + deltaX;
-            e.preventDefault();
-        }, { passive: false });
-
-        wrapper.addEventListener('touchend', function () {
-            isTouching = false;
-        }, { passive: true });
-
-        // ===== 键盘 =====
-        wrapper.setAttribute('tabindex', '0');
-        wrapper.addEventListener('keydown', function (e) {
-            if (e.key === 'ArrowLeft') {
-                wrapper.scrollLeft -= 50;
-                e.preventDefault();
-            } else if (e.key === 'ArrowRight') {
-                wrapper.scrollLeft += 50;
-                e.preventDefault();
-            }
-        });
-
-        return wrapper;
-    }
-
-    // ================================================================
-    // 七、处理超长公式
-    // ================================================================
-
-    function handleOverflowFormulas(container) {
-        if (!container) return;
-
-        // 1. 强制修复所有父容器
-        forceFixContainers(container);
-
-        // 2. 处理所有块级公式
-        const formulas = container.querySelectorAll('.katex-display');
-
-        formulas.forEach((formula) => {
-            // 跳过已处理的
-            if (formula.dataset.overflowHandled === 'true') return;
-
-            // 强制公式不换行
-            formula.style.whiteSpace = 'nowrap';
-            formula.style.display = 'inline-block';
-            formula.style.maxWidth = 'none';
-            formula.style.overflow = 'visible';
-
-            const katexEl = formula.querySelector('.katex');
-            if (katexEl) {
-                katexEl.style.whiteSpace = 'nowrap';
-                katexEl.style.display = 'inline-block';
-                katexEl.style.maxWidth = 'none';
-                katexEl.style.overflow = 'visible';
-            }
-
-            // 获取可用宽度
-            const maxWidth = getMainColumnWidth(formula);
-            if (maxWidth <= 10) return;
-
-            // 获取公式宽度
-            const formulaWidth = formula.scrollWidth || formula.offsetWidth || 0;
-
-            // 如果超出，包装为滚动容器
-            if (formulaWidth > maxWidth - 6) {
-                wrapWithScrollContainer(formula, maxWidth - 4);
-                formula.dataset.overflowHandled = 'true';
-            }
-        });
-
-        // 3. 处理行内公式
-        const inlineFormulas = container.querySelectorAll('.katex:not(.katex-display)');
-        inlineFormulas.forEach((formula) => {
-            if (formula.dataset.overflowHandled === 'true') return;
-
-            const maxWidth = getMainColumnWidth(formula);
-            if (maxWidth <= 10) return;
-
-            if (formula.scrollWidth > maxWidth - 20) {
-                const parent = formula.parentElement;
-                if (!parent.classList.contains('inline-formula-wrap')) {
-                    const wrapper = document.createElement('span');
-                    wrapper.className = 'inline-formula-wrap';
-                    wrapper.style.cssText = `
-                        display: inline-block !important;
-                        max-width: ${maxWidth - 8}px !important;
-                        overflow-x: auto !important;
-                        overflow-y: hidden !important;
-                        padding: 2px 0 !important;
-                        vertical-align: middle !important;
-                        scrollbar-width: thin !important;
-                        -webkit-overflow-scrolling: touch !important;
-                    `;
-                    parent.replaceChild(wrapper, formula);
-                    wrapper.appendChild(formula);
-                    formula.dataset.overflowHandled = 'true';
-                }
-            }
-        });
-    }
-
-    // ================================================================
-    // 八、注入样式
-    // ================================================================
-
-    function injectFormulaStyles() {
-        const styleId = 'katex-overflow-styles';
-        if (document.getElementById(styleId)) return;
-
-        const styles = `
-            .detail-main-column {
-                /* 左栏公式绝不能溢出到右栏，故隐藏主列溢出 */
-                overflow: hidden !important;
-                position: relative !important;
-            }
-            .detail-body {
-                overflow: visible !important;
-            }
-            .detail-container {
-                overflow: visible !important;
-            }
-
-            .detail-main-column .katex-display {
-                display: inline-block !important;
-                padding: 4px 2px !important;
-                margin: 4px 0 !important;
-                max-width: none !important;
-                white-space: nowrap !important;
-                overflow: visible !important;
-            }
-            
-            .detail-main-column .katex-display .katex {
-                display: inline-block !important;
-                white-space: nowrap !important;
-                overflow: visible !important;
-            }
-            
-            .formula-scroll-wrapper {
-                overflow-x: auto !important;
-                overflow-y: hidden !important;
-                padding: 6px 2px !important;
-                margin: 4px 0 !important;
-                max-width: 100% !important;
-                width: 100% !important;
-                -webkit-overflow-scrolling: touch !important;
-                touch-action: pan-x !important;
-                cursor: grab !important;
-                display: block !important;
-                scrollbar-width: thin !important;
-                scrollbar-color: #ccc #f0f0f0 !important;
-                min-height: 40px !important;
-                background: transparent !important;
-            }
-            
-            .formula-scroll-wrapper::-webkit-scrollbar {
-                height: 5px !important;
-            }
-            .formula-scroll-wrapper::-webkit-scrollbar-track {
-                background: #f0f0f0 !important;
-                border-radius: 3px !important;
-            }
-            .formula-scroll-wrapper::-webkit-scrollbar-thumb {
-                background: #ccc !important;
-                border-radius: 3px !important;
-            }
-            .formula-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-                background: #999 !important;
-            }
-            
-            .formula-scroll-wrapper.has-scroll::after {
-                content: '↔ 滑动查看完整公式';
-                display: block !important;
-                text-align: center !important;
-                font-size: 11px !important;
-                color: #bbb !important;
-                padding: 2px 0 0 !important;
-                user-select: none !important;
-                pointer-events: none !important;
-            }
-            
-            @media (max-width: 767px) {
-                .formula-scroll-wrapper.has-scroll::after {
-                    font-size: 10px !important;
-                }
-                .formula-scroll-wrapper {
-                    min-height: 36px !important;
-                }
-            }
-            
-            @media print {
-                .formula-scroll-wrapper {
-                    overflow: visible !important;
-                    padding: 0 !important;
-                }
-                .formula-scroll-wrapper.has-scroll::after {
-                    display: none !important;
-                }
-                .detail-main-column .katex-display {
-                    white-space: normal !important;
-                }
-            }
-        `;
-
-        const styleEl = document.createElement('style');
-        styleEl.id = styleId;
-        styleEl.textContent = styles;
-        document.head.appendChild(styleEl);
-    }
-
-    // ================================================================
-    // 九、窗口变化
-    // ================================================================
-
-    let resizeTimeout = null;
-
-    function handleResize() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            const containers = document.querySelectorAll('.detail-body');
-            containers.forEach(container => {
-                container.querySelectorAll('.katex-display, .katex').forEach(el => {
-                    el.dataset.overflowHandled = 'false';
-                });
-                container.querySelectorAll('.formula-scroll-wrapper').forEach(wrapper => {
-                    const formula = wrapper.querySelector('.katex-display');
-                    if (formula) {
-                        const parent = wrapper.parentElement;
-                        parent.replaceChild(formula, wrapper);
-                        formula.dataset.overflowHandled = 'false';
-                    }
-                });
-                handleOverflowFormulas(container);
-            });
-        }, 300);
-    }
-
-    // ================================================================
-    // 十、渲染器
-    // ================================================================
-
-    function renderMath(element) {
-        if (!element) {
-            console.warn('renderMath: 元素不存在');
-            return;
-        }
-
+    // ---------- 渲染器 ----------
+    function renderMath(el) {
+        if (!el) return;
         if (!window.renderMathInElement) {
-            loadKatex()
-                .then(() => renderMath(element))
-                .catch(() => {
-                    element.innerHTML = element.textContent || element.innerHTML;
-                });
-            return;
+            return loadKatex().then(() => renderMath(el)).catch(() => {
+                el.innerHTML = (el.textContent || '').replace(/\$/g, '');
+            });
         }
-
-        const originalContent = element.innerHTML;
-
+        const original = el.innerHTML;
         try {
-            preprocessElementContent(element);
-
-            let isTimeout = false;
-            const timeoutId = setTimeout(() => {
-                isTimeout = true;
-                console.warn('KaTeX 渲染超时');
-                element.innerHTML = originalContent.replace(/\$/g, '');
-                element.querySelectorAll('.katex, .katex-display').forEach(el => el.remove());
+            preprocessElementContent(el);
+            let timedOut = false;
+            const timer = setTimeout(() => {
+                timedOut = true;
+                el.innerHTML = original.replace(/\$/g, '');
+                el.querySelectorAll('.katex, .katex-display').forEach(e => e.remove());
             }, RENDER_TIMEOUT);
-
-            window.renderMathInElement(element, {
+            window.renderMathInElement(el, {
                 delimiters: [
                     { left: '$$', right: '$$', display: true },
                     { left: '$', right: '$', display: false },
@@ -594,185 +157,86 @@
                 ],
                 throwOnError: false,
                 ignoredClasses: ['question-slot'],
-                strict: false,
-                errorCallback: function (msg, err) {
-                    console.warn('KaTeX 公式渲染失败:', msg);
-                    return msg;
-                }
+                strict: false
             });
-
-            clearTimeout(timeoutId);
-
-            if (isTimeout) {
-                if (!element.innerHTML || element.innerHTML.trim() === '') {
-                    element.innerHTML = originalContent.replace(/\$/g, '');
-                }
-            }
-
-            setTimeout(() => {
-                handleOverflowFormulas(element);
-            }, 200);
-
-        } catch (error) {
-            console.warn('KaTeX 渲染出错:', error);
-            if (element) {
-                const textContent = element.textContent || originalContent;
-                element.innerHTML = textContent.replace(/\$/g, '');
-            }
+            clearTimeout(timer);
+            if (timedOut && !el.innerHTML.trim()) el.innerHTML = original.replace(/\$/g, '');
+        } catch (e) {
+            el.innerHTML = (el.textContent || '').replace(/\$/g, '');
         }
+        // 立即修补
+        forceBreakAllKatex(el);
+        // 再次修补，确保异步渲染覆盖
+        setTimeout(() => forceBreakAllKatex(el), 100);
     }
 
-    // ================================================================
-    // 十一、批量渲染
-    // ================================================================
-
-    function renderMathInBatches(container, batchSize = 3) {
+    function renderInBatches(container, size = 3) {
         if (!container) return;
-
-        const candidates = container.querySelectorAll(
-            'p, li, div:not(.question-slot):not(.katex):not(.katex-display), ' +
-            'td, th, blockquote, .detail-main-column, .detail-sidebar-column'
-        );
-
-        const targets = Array.from(candidates).filter(el => {
-            return el.textContent && el.textContent.includes('$');
-        });
-
-        if (targets.length === 0) return;
-
-        let index = 0;
-
-        function processBatch() {
-            const end = Math.min(index + batchSize, targets.length);
-            const batch = targets.slice(index, end);
-
-            batch.forEach((el) => {
-                try {
-                    renderMath(el);
-                } catch (e) {
-                    console.warn('跳过有问题的公式块:', e);
-                    if (el) {
-                        el.innerHTML = el.textContent.replace(/\$/g, '');
-                    }
-                }
-            });
-
-            index = end;
-
-            if (index < targets.length) {
-                requestAnimationFrame(processBatch);
-            } else {
-                setTimeout(() => {
-                    handleOverflowFormulas(container);
-                }, 300);
-            }
-        }
-
-        requestAnimationFrame(processBatch);
-    }
-
-    // ================================================================
-    // 十二、观察者
-    // ================================================================
-
-    function observeDetailBody() {
-        const target = document.querySelector('.detail-body');
-        if (!target) {
-            setTimeout(observeDetailBody, 500);
+        const candidates = Array.from(container.querySelectorAll(
+            'p,li,div:not(.question-slot):not(.katex):not(.katex-display),td,th,blockquote'
+        )).filter(el => el.textContent && el.textContent.includes('$'));
+        if (!candidates.length) {
+            forceBreakAllKatex(container);  // 对已有公式也修补
             return;
         }
-
-        // 先强制修复父容器
-        forceFixContainers(target);
-
-        if (target.innerHTML.trim() !== '') {
-            loadKatex()
-                .then(() => {
-                    renderMathInBatches(target);
-                })
-                .catch(() => {
-                    target.innerHTML = target.textContent || target.innerHTML;
-                });
+        let i = 0;
+        function batch() {
+            const end = Math.min(i + size, candidates.length);
+            candidates.slice(i, end).forEach(el => { try { renderMath(el) } catch (e) { } });
+            i = end;
+            if (i < candidates.length) requestAnimationFrame(batch);
+            else setTimeout(() => forceBreakAllKatex(container), 300);
         }
-
-        const observer = new MutationObserver(() => {
-            if (observer._rendering) return;
-            observer._rendering = true;
-
-            loadKatex()
-                .then(() => {
-                    renderMathInBatches(target);
-                    observer._rendering = false;
-                })
-                .catch(() => {
-                    observer._rendering = false;
-                });
-        });
-
-        observer.observe(target, {
-            childList: true,
-            subtree: true
-        });
+        requestAnimationFrame(batch);
     }
 
-    // ================================================================
-    // 十三、公共 API
-    // ================================================================
+    // ---------- 观察者 ----------
+    function observe() {
+        const target = document.querySelector('.detail-body');
+        if (!target) { setTimeout(observe, 500); return; }
+        // 初始加载
+        if (target.innerHTML.trim()) {
+            loadKatex().then(() => renderInBatches(target)).catch(() => {
+                target.innerHTML = (target.textContent || '').replace(/\$/g, '');
+            });
+        }
+        const mo = new MutationObserver(() => {
+            if (mo._rendering) return;
+            mo._rendering = true;
+            loadKatex().then(() => { renderInBatches(target); mo._rendering = false; })
+                .catch(() => { mo._rendering = false; });
+        });
+        mo.observe(target, { childList: true, subtree: true });
+    }
 
+    // ---------- 窗口变化重新修补 ----------
+    window.addEventListener('resize', () => {
+        clearTimeout(window._katexResize);
+        window._katexResize = setTimeout(() => {
+            document.querySelectorAll('.detail-body').forEach(forceBreakAllKatex);
+        }, 300);
+    });
+
+    // ---------- 全局 API ----------
     window.katexLoader = {
         load: loadKatex,
         render: renderMath,
-        loadAndRender: function (element) {
-            return loadKatex().then(() => renderMath(element));
-        },
-        renderInBatches: renderMathInBatches,
-        handleOverflow: handleOverflowFormulas,
-        forceFix: forceFixContainers
+        loadAndRender: el => loadKatex().then(() => renderMath(el)),
+        renderInBatches,
+        forceBreak: forceBreakAllKatex
     };
 
-    // ================================================================
-    // 十四、初始化
-    // ================================================================
-
+    // ---------- 自动初始化 ----------
     function autoInit() {
-        injectFormulaStyles();
-
-        // 立即修复所有容器
-        setTimeout(() => {
-            const containers = document.querySelectorAll('.detail-body');
-            containers.forEach(container => {
-                forceFixContainers(container);
-            });
-        }, 50);
-
-        setTimeout(() => {
-            observeDetailBody();
-        }, 100);
-
-        window.addEventListener('resize', handleResize);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(handleResize, 500);
-        });
+        // 不再注入 CSS，因为我们会用 JS 直接写内联样式，但保留 .detail-main-column overflow:hidden 的原始规则（如果有的话）
+        // 如果页面原本有 .detail-main-column { overflow: hidden; } 不需改动，因为我们保证了内部公式已换行不会超出。
+        setTimeout(observe, 100);
     }
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', autoInit);
     } else {
         autoInit();
-    }
-
-    // ================================================================
-    // 十五、导出
-    // ================================================================
-
-    if (typeof module !== 'undefined' && module.exports) {
-        module.exports = {
-            loadKatex,
-            renderMath,
-            renderMathInBatches,
-            handleOverflowFormulas,
-            forceFixContainers
-        };
     }
 
 })();
