@@ -54,7 +54,7 @@
             if (node.nodeType === 3) { node.textContent = preprocessMathContent(node.textContent); return; }
             if (node.nodeType === 1) {
                 const tag = node.tagName.toLowerCase();
-                if (['code', 'pre', 'script', 'style'].includes(tag) || node.classList.contains('katex')) return;
+                if (['code', 'pre', 'script', 'style', 'textarea'].includes(tag) || node.classList.contains('katex')) return;
                 node.childNodes.forEach(walk);
             }
         }
@@ -173,7 +173,7 @@
     function renderInBatches(container, size = 3) {
         if (!container) return;
         const candidates = Array.from(container.querySelectorAll(
-            'p,li,div:not(.question-slot):not(.katex):not(.katex-display),td,th,blockquote'
+            'p,li,td,th,blockquote'
         )).filter(el => el.textContent && el.textContent.includes('$'));
         if (!candidates.length) {
             forceBreakAllKatex(container);  // 对已有公式也修补

@@ -370,13 +370,18 @@ async function loadArticleHasQuestions() {
 async function loadAnswerKeys() {
     const { data, error } = await supabase
         .from('article_answer_keys')
-        .select('blog_id');
+        .select('blog_id, answer_text');
     if (error) {
         console.error('加载答案设置失败:', error);
         return;
     }
     articleAnswerKeys.clear();
-    (data || []).forEach(item => articleAnswerKeys.set(Number(item.blog_id), true));
+    (data || []).forEach(item => {
+        // 只将至少有一个非空答案的文章标记为"已设置"
+        if (item.answer_text && item.answer_text.trim() !== '') {
+            articleAnswerKeys.set(Number(item.blog_id), true);
+        }
+    });
 }
 
 /**
@@ -695,23 +700,20 @@ function renderReviewTree(studentId, subject, filter) {
     if (filter === 'pending') {
         filteredBlogs = filteredBlogs.filter(b => {
             const hasQ = articleHasQuestions.get(Number(b.id)) || false;
-            const hasKey = articleAnswerKeys.has(Number(b.id));
             const submissionStatus = studentSubmissions.get(Number(b.id));
-            return hasQ && hasKey && submissionStatus === 'pending';
+            return hasQ && submissionStatus === 'pending';
         });
     } else if (filter === 'reviewed') {
         filteredBlogs = filteredBlogs.filter(b => {
             const hasQ = articleHasQuestions.get(Number(b.id)) || false;
-            const hasKey = articleAnswerKeys.has(Number(b.id));
             const submissionStatus = studentSubmissions.get(Number(b.id));
-            return hasQ && hasKey && submissionStatus === 'reviewed';
+            return hasQ && submissionStatus === 'reviewed';
         });
     } else if (filter === 'noneed') {
         filteredBlogs = filteredBlogs.filter(b => {
             const hasQ = articleHasQuestions.get(Number(b.id)) || false;
-            const hasKey = articleAnswerKeys.has(Number(b.id));
-            // 无需批阅：没有设置答案 或 没有题目
-            return !hasKey || !hasQ;
+            // 无需批阅：没有题目
+            return !hasQ;
         });
     }
 

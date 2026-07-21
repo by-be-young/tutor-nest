@@ -874,14 +874,20 @@ async function persistAnswerKeys({ silent = false } = {}) {
             return false;
         }
         const rows = [];
+        let hasAnyContent = false;
         detailState.slotNodes.forEach((node, questionId) => {
             const answerText = node.textarea?.value || '';
             const autoGrade = Boolean(node.autoWrap?.querySelector('input[type="checkbox"]')?.checked);
+            if (answerText.trim() !== '' || autoGrade) hasAnyContent = true;
             rows.push({ blog_id: detailState.blogId, question_id: questionId, answer_text: answerText, auto_grade: autoGrade });
         });
         if (!rows.length) {
             if (!silent) setFabStatus(true, '没有可保存的答案设置');
             return true;
+        }
+        if (!hasAnyContent) {
+            if (!silent) setFabStatus(false, '请先填写标准答案内容再保存');
+            return false;
         }
         const { error } = await supabase
             .from('article_answer_keys')
