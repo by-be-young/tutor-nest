@@ -480,6 +480,10 @@ async function switchStudent(studentId) {
  * @param {string} subject - 科目名称
  */
 function switchSubject(subject) {
+    if (permissionDirty) {
+        const confirmed = confirm('当前科目的权限有未保存的修改，切换科目将丢弃这些修改，是否继续？');
+        if (!confirmed) return;
+    }
     currentSubject = subject;
     const student = allStudents.find(s => Number(s.id) === Number(currentStudentId));
     if (student) {
@@ -548,11 +552,35 @@ async function savePermissions() {
     }
     const student = allStudents.find(s => Number(s.id) === Number(currentStudentId));
     const existing = Array.isArray(student?.permissions) ? student.permissions.map(Number).filter(Number.isFinite) : [];
-    const currentBlogIds = getBlogsBySubject(currentSubject).map(b => Number(b.id)).filter(Number.isFinite);
-    const checked = treeContainer.querySelectorAll('.perm-checkbox:checked');
-    const selected = Array.from(checked).map(cb => Number(cb.dataset.id)).filter(Number.isFinite);
-    const merged = [...existing.filter(id => !currentBlogIds.includes(id)), ...selected];
-    const permissions = Array.from(new Set(merged));
+    const currentBlogIds = new Set(getBlogsBySubject(currentSubject).map(b => Number(b.id)).filter(Number.isFinite));
+
+    // 获取树中所有可见的复选框及其状态
+    const allCheckboxes = treeContainer.querySelectorAll('.perm-checkbox');
+    const visibleBlogIds = new Set(Array.from(allCheckboxes).map(cb => Number(cb.dataset.id)));
+    const checkedBlogIds = new Set(Array.from(allCheckboxes).filter(cb => cb.checked).map(cb => Number(cb.dataset.id)));
+
+    // 构建权限列表：
+    // - 其他科目的权限，原样保留
+    // - 当前科目的权限，可见文章用复选框状态，不可见文章保留原有状态
+    const result = new Set();
+
+    // 保留非当前科目的权限
+    existing.forEach(id => {
+        if (!currentBlogIds.has(id)) result.add(id);
+    });
+
+    // 处理当前科目的文章
+    currentBlogIds.forEach(id => {
+        if (visibleBlogIds.has(id)) {
+            // 树中可见 → 以复选框状态为准
+            if (checkedBlogIds.has(id)) result.add(id);
+        } else {
+            // 树中不可见（被筛选过滤） → 保留原有权限
+            if (existing.includes(id)) result.add(id);
+        }
+    });
+
+    const permissions = Array.from(result);
 
     const { error } = await supabase
         .from('student')
